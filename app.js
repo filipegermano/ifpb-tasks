@@ -5,10 +5,44 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+//fb
+var FB = require('fb');
+//Passport
+var passport = require('passport');
+var config = require('./configurations/config.js');
+var FacebookStrategy = require('passport-facebook').Strategy;
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+passport.serializeUser(function(user, done) {
+    done(null, user);
+});
+
+passport.serializeUser(function(obj, done) {
+    done(null, obj);
+});
+
+passport.use(new FacebookStrategy({
+    clientID: config.facebook_api_key,
+    clientSecret: config.facebook_api_secret,
+    callbackURL: config.callback_url
+    },
+    function(accessToken, refreshToken, profile, done) {
+        FB.setAccessToken(accessToken);
+
+        process.nextTick(function() {
+            //vericar se o token já existe no banco e retornar o profile
+            //ou criar um novo
+
+            //como não usa BD não faz nada
+
+            return done(null, profile);
+        });
+    }
+));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,6 +58,33 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+//rotas 
+app.get('/auth/facebook', passport.authenticate(
+    'facebook',
+    {scope: ['email', 'user_friends']} ));
+
+app.get('/auth/facebook/callback',
+    passport.authenticate(
+        'facebook',
+        {succcessRedirect: '/friends',
+        failureRedirect: '/'}),
+    function(req, res) {
+        res.redirect('/');
+});
+
+app.get('/friends', function(req, res){
+    FB.api('me/taggable_friends', function(response){
+        if (!res || res.error) {
+            res.render('index', {title: 'Fail', friends: []});
+            return;
+        }
+        res.send(response.data);
+    });
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
