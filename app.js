@@ -29,20 +29,20 @@ passport.use(new FacebookStrategy({
     clientID: config.facebook_api_key,
     clientSecret: config.facebook_api_secret,
     callbackURL: config.callback_url
-    },
-    function(accessToken, refreshToken, profile, done) {
-        FB.setAccessToken(accessToken);
+},
+                                  function(accessToken, refreshToken, profile, done) {
+    FB.setAccessToken(accessToken);
 
-        process.nextTick(function() {
-            //vericar se o token já existe no banco e retornar o profile
-            //ou criar um novo
+    process.nextTick(function() {
+        //vericar se o token já existe no banco e retornar o profile
+        //ou criar um novo
 
-            //como não usa BD não faz nada
+        //como não usa BD não faz nada
 
-            return done(null, profile);
-        });
-    }
-));
+        return done(null, profile);
+    });
+}
+                                 ));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -65,38 +65,75 @@ app.use(passport.session());
 //rotas 
 app.get('/auth/facebook', passport.authenticate(
     'facebook',
-    {scope: ['email', 'user_friends', 'public_profile', 'publish_actions']} ));
+    {scope: ['user_friends, publish_actions, status_update, read_stream, manage_friendlists']}));
 
 app.get('/auth/facebook/callback',
-    passport.authenticate(
-        'facebook',
-        {successRedirect: ' /postme',
-        failureRedirect: '/'}),
-    function(req, res) {
-        res.redirect('/');
+        passport.authenticate(
+    'facebook',
+    {successRedirect:  '/postme',
+     failureRedirect: '/'}),
+        function(req, res) {
+    res.redirect('/');
 });
 
 app.get('/postme', function(req, res){    
-    var body = 'Teste Projeto POS';
-    FB.api('me/feed', 'post', { message: body}, function(response) {
-    if(!response || response.error) {
-        console.log(!response ? 'error occurred' : response.error);
-        return;
-    }
-    console.log('Post Id: ' + response.id);
-    });
-    res.status(200).json('foi!');
-})
+    var responseTaggable;
 
-app.get('/friends', function(req, res){
     FB.api('me/taggable_friends', function(response){
         if (!res || res.error) {
             res.render('index', {title: 'Fail', friends: []});
             return;
         }
-        res.send(response.data);
+        responseTaggable = response.data;
+
+
+//        console.log('res tag ' + responseTaggable);
+        var id;
+        for(var i=0; i<responseTaggable.length; i++){
+            if(responseTaggable[i].name == 'Filipe Germano'){
+                id = responseTaggable[i].id;
+                break;
+            }
+        }
+
+        var tags = id;
+        console.log(tags);
+        var body = 'Teste Projeto POS @['+id+']';
+        console.log(body);
+        FB.api('me/ifpb-tasks:newtask', 'post', { task: "http://samples.ogp.me/737590196361828", message: body, tags : tags }, function(response) {
+            if(!response || response.error) {
+                console.log(!response ? 'error occurred' : response.error);
+                return;
+            }
+            console.log(response);
+            console.log('Post Id: ' + response.id);
+        });
+        res.status(200).json('foi!');
+
+
+    });
+})
+
+app.get('/friends', function(req, res){
+    FB.api('me/taggable_friends', function(response){
+        if(!res || res.error){
+            res.render('index', {title : 'Fail', friends : []});
+            return;
+        }
+        res.send(response);
+    })
+});
+
+app.get('/index', function(req, res){
+    fb.api('me', function(response){
+        if (!res || res.error) {
+            res.render('index', {title: 'Fail', friends: []});
+            return;
+        }
+        res.send(response);
     });
 });
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
