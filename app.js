@@ -65,16 +65,28 @@ app.use(passport.session());
 //rotas 
 app.get('/auth/facebook', passport.authenticate(
     'facebook',
-    {scope: ['email', 'user_friends']} ));
+    {scope: ['email', 'user_friends', 'public_profile', 'publish_actions']} ));
 
 app.get('/auth/facebook/callback',
     passport.authenticate(
         'facebook',
-        {succcessRedirect: '/friends',
+        {successRedirect: ' /postme',
         failureRedirect: '/'}),
     function(req, res) {
         res.redirect('/');
 });
+
+app.get('/postme', function(req, res){    
+    var body = 'Teste Projeto POS';
+    FB.api('me/feed', 'post', { message: body}, function(response) {
+    if(!response || response.error) {
+        console.log(!response ? 'error occurred' : response.error);
+        return;
+    }
+    console.log('Post Id: ' + response.id);
+    });
+    res.status(200).json('foi!');
+})
 
 app.get('/friends', function(req, res){
     FB.api('me/taggable_friends', function(response){
