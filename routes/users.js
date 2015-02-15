@@ -3,8 +3,8 @@ var router = express.Router();
 
 var mongoose = require('mongoose');
 var user = require('../models/user.js');
+var task = require('../models/task.js');
 
-/* GET todos listing. */
 router.get('/', function(req, res, next) {
     user.find(function(err,users){
         if(err) {
@@ -45,6 +45,11 @@ router.post('/', function(req,res,next){
 
 });
 
+
+router.post('newTask', function(){
+    
+});
+
 router.put('/:id', function(req,res,next){
     user.findByIdAndUpdate(req.params.id, req.body, function(err, users){
         if(err) return next(err);
@@ -59,6 +64,5 @@ router.delete('/:id', function(req,res,next){
         res.status(200).json(users);
     });
 });
-
 
 module.exports = router;

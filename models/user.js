@@ -1,13 +1,11 @@
 var mongoose = require('mongoose');
-var findOrCreate = require('mongoose-findorcreate');
 
 var userSchema = new mongoose.Schema({
     name: String,
     facebook_id : String,
+    tasksCreated : [{type: mongoose.Schema.Types.ObjectId, ref : 'task'}],
+    tasksAssigned : [{type: mongoose.Schema.Types.ObjectId, ref : 'task'}],
     created_at : {type: Date, default : Date.now},
 });
-
-
-userSchema.plugin(findOrCreate);
 
 module.exports = mongoose.model('user', userSchema);
