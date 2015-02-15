@@ -4,6 +4,19 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var users = require('./routes/users');
+
+var http = require('http');
+
+//--mongo
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/ifpb-tasks', function(err){
+    if(err){
+        console.log('connection error', err);
+    }else{
+        console.log('connection successful');
+    }
+});
 
 //fb
 var FB = require('fb');
@@ -30,19 +43,61 @@ passport.use(new FacebookStrategy({
     clientSecret: config.facebook_api_secret,
     callbackURL: config.callback_url
 },
-                                  function(accessToken, refreshToken, profile, done) {
+function(accessToken, refreshToken, profile, done) {
     FB.setAccessToken(accessToken);
 
     process.nextTick(function() {
-        //vericar se o token já existe no banco e retornar o profile
-        //ou criar um novo
-
-        //como não usa BD não faz nada
-
+        
+        sendPostRequestToCreateUser(profile._json.id, profile._json.name);
         return done(null, profile);
     });
+}   
+));
+
+
+function sendPostRequestToCreateUser(id, name){
+        var user = {
+            facebook_id : id,
+            name : name
+        };
+
+        var userString = JSON.stringify(user);
+
+        var headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': userString.length
+        };
+        
+        var options = {
+            host: 'localhost',
+            port: 3000,
+            path: '/users/',
+            method: 'POST',
+            headers: headers
+        };
+        
+        var req = http.request(options, function(res) {
+            res.setEncoding('utf-8');
+
+            var responseString = '';
+            
+            res.on('data', function(data) {
+                responseString += data;
+            });
+
+            res.on('end', function() {
+//                var resultObject = JSON.parse(responseString);
+                console.info('post request ended');
+            });
+        });
+        
+        req.on('error', function(e) {
+            console.error('Error on creating new user');
+        });
+
+        req.write(userString);
+        req.end();
 }
-                                 ));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -63,17 +118,29 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //rotas 
-app.get('/auth/facebook', passport.authenticate(
-    'facebook',
-    {scope: ['user_friends, publish_actions, status_update, read_stream, manage_friendlists']}));
+app.get('/auth/facebook', 
+        passport.authenticate(
+    'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']}
+));
 
 app.get('/auth/facebook/callback',
         passport.authenticate(
     'facebook',
-    {successRedirect:  '/postme',
+    {successRedirect:  '/friends',
      failureRedirect: '/'}),
         function(req, res) {
     res.redirect('/');
+});
+
+app.get('/createuser', function(res,res){
+    FB.api('me', function(response){
+        if(!res || res.error){
+            res.render('index', {title : 'Fail', friends : []});
+            return;
+        }
+        res.re;
+    });
+    res.redirect
 });
 
 app.get('/postme', function(req, res){    
@@ -84,13 +151,15 @@ app.get('/postme', function(req, res){
             res.render('index', {title: 'Fail', friends: []});
             return;
         }
+        console.log(response);
         responseTaggable = response.data;
 
 
-//        console.log('res tag ' + responseTaggable);
+        //        console.log('res tag ' + responseTaggable);
         var id;
         for(var i=0; i<responseTaggable.length; i++){
-            if(responseTaggable[i].name == 'Filipe Germano'){
+            console.log(responseTaggable[i].name + '\n');
+            if(responseTaggable[i].name == 'Raquel Oliveira'){
                 id = responseTaggable[i].id;
                 break;
             }
@@ -100,19 +169,29 @@ app.get('/postme', function(req, res){
         console.log(tags);
         var body = 'Teste Projeto POS @['+id+']';
         console.log(body);
-        FB.api('me/ifpb-tasks:newtask', 'post', { task: "http://samples.ogp.me/737590196361828", message: body, tags : tags }, function(response) {
+        FB.api('me/ifpb-tasks:create', 'post', {task: "http://samples.ogp.me/737978356323012" , message: body, tags: tags}, function(response) {
             if(!response || response.error) {
                 console.log(!response ? 'error occurred' : response.error);
                 return;
             }
-            console.log(response);
-            console.log('Post Id: ' + response.id);
-        });
-        res.status(200).json('foi!');
 
+            console.log('Post Id: ' + response.id);
+
+            if(response.id){
+                res.status(200).json('foi!');
+            }else{
+                res.status(200).json('não foi!');
+            }
+        });
 
     });
-})
+});
+
+
+app.get('',function(){
+
+
+});
 
 app.get('/friends', function(req, res){
     FB.api('me/taggable_friends', function(response){
@@ -120,12 +199,12 @@ app.get('/friends', function(req, res){
             res.render('index', {title : 'Fail', friends : []});
             return;
         }
-        res.send(response);
+        res.send(response.data);
     })
 });
 
 app.get('/index', function(req, res){
-    fb.api('me', function(response){
+    FB.api('me', function(response){
         if (!res || res.error) {
             res.render('index', {title: 'Fail', friends: []});
             return;
