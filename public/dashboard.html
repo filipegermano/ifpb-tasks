@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app="iftasks">
+    <head>
+        <title>IFPB-tasks</title>
+        <link href="libs/bootstrap/css/bootstrap.min.cerulean.css" rel="stylesheet" type="text/css">
+        <link href="/stylesheets/dashboard.css" rel="stylesheet" type="text/css"/>
+        <link href="/stylesheets/style.css" rel="stylesheet" type="text/css"/>
+        <script src="libs/bootstrap/js/jquery.min.js" type="text/javascript"></script>
+        <script src="libs/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="libs/angular/angular.min.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript"></script>
+        <script src="js/dashboard.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="text-center">IFPB-tasks</h1>
+
+            <div class="col-md-6 col-md-offset-3" id="newTask">
+                <form>
+                    <div class="form-group">
+                        <label>Nome da Tarefa: </label>
+                        <input name="taskName" id="taskName" class="form-control" required/>    
+                    </div>
+                    <div class="form-group">
+                        <label>Descripção da Terefa: </label>
+                        <textarea class="form-control" name="taskDescription" id="taskDescription" required></textarea>
+                    </div>
+
+                    <label>Quem deve fazer essa tarefa</label>
+                    <img src="imgs/facebook.gif" id="loadingIcon"/>
+                    <div id="friends" ng-controller="FriendListController as friendsCtrl">
+                        <div class="friend col-xs-12" ng-repeat="friend in friendsCtrl.list">
+                            <img class="img img-responsive pull-left friendImg" src='{{friend.picture.data.url}}'/>
+                            <h4 class="friendName pull-left">{{friend.name}}</h4>
+                            <input type="checkbox" class="pull-right taskCheckBox" value="{{friend.id}}"/>
+                        </div>
+                    </div>
+
+                    <input type="submit" value="Criar Tarefa" class="btn btn-success pull-right">
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

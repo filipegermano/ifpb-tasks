@@ -1,0 +1,34 @@
+#newTask textarea{
+    resize: none;
+    min-height: 100px;
+}
+
+#newTask form .ng-invalid.ng-dirty{
+    border-color: red;
+    border-width: medium;
+}
+
+#newTask form .ng-valid.ng-dirty{
+    border-color: green;
+    border-width: medium;
+}
+
+#newTask #friends{
+    max-height: 350px;
+    overflow-y: scroll;
+}
+
+#newTask #friends .friend{
+    margin-bottom: 8px;
+}
+
+#newTask #friends .friend .friendImg{
+    border-radius: 100px;
+}
+
+#newTask #friends .friend .friendName{
+    color: black;
+    margin-left: 5px;
+    font-size: medium;
+}
+

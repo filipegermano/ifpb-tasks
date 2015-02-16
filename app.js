@@ -43,60 +43,60 @@ passport.use(new FacebookStrategy({
     clientSecret: config.facebook_api_secret,
     callbackURL: config.callback_url
 },
-function(accessToken, refreshToken, profile, done) {
+                                  function(accessToken, refreshToken, profile, done) {
     FB.setAccessToken(accessToken);
 
     process.nextTick(function() {
-        
+
         sendPostRequestToCreateUser(profile._json.id, profile._json.name);
         return done(null, profile);
     });
 }   
-));
+                                 ));
 
 
 function sendPostRequestToCreateUser(id, name){
-        var user = {
-            facebook_id : id,
-            name : name
-        };
+    var user = {
+        facebook_id : id,
+        name : name
+    };
 
-        var userString = JSON.stringify(user);
+    var userString = JSON.stringify(user);
 
-        var headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': userString.length
-        };
-        
-        var options = {
-            host: 'localhost',
-            port: 3000,
-            path: '/users/',
-            method: 'POST',
-            headers: headers
-        };
-        
-        var req = http.request(options, function(res) {
-            res.setEncoding('utf-8');
+    var headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': userString.length
+    };
 
-            var responseString = '';
-            
-            res.on('data', function(data) {
-                responseString += data;
-            });
+    var options = {
+        host: 'localhost',
+        port: 3000,
+        path: '/users/',
+        method: 'POST',
+        headers: headers
+    };
 
-            res.on('end', function() {
-//                var resultObject = JSON.parse(responseString);
-                console.info('post request ended');
-            });
-        });
-        
-        req.on('error', function(e) {
-            console.error('Error on creating new user');
+    var req = http.request(options, function(res) {
+        res.setEncoding('utf-8');
+
+        var responseString = '';
+
+        res.on('data', function(data) {
+            responseString += data;
         });
 
-        req.write(userString);
-        req.end();
+        res.on('end', function() {
+            //                var resultObject = JSON.parse(responseString);
+            console.info('post request ended');
+        });
+    });
+
+    req.on('error', function(e) {
+        console.error('Error on creating new user');
+    });
+
+    req.write(userString);
+    req.end();
 }
 
 // view engine setup
@@ -126,22 +126,21 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback',
         passport.authenticate(
     'facebook',
-    {successRedirect:  '/friends',
+    {successRedirect:  '/loggedin',
      failureRedirect: '/'}),
         function(req, res) {
     res.redirect('/');
 });
 
-app.get('/createuser', function(res,res){
-    FB.api('me', function(response){
-        if(!res || res.error){
-            res.render('index', {title : 'Fail', friends : []});
-            return;
-        }
-        res.re;
-    });
-    res.redirect
-});
+//app.get('/checkPermissions', function(req, res){
+//    FB.api('me/permissions',function (response) {
+//        if (!response || !response.error) {
+//            console.log(response);
+//        
+//        }
+//        res.status(200).json(response);
+//    });
+//});
 
 app.get('/postme', function(req, res){    
     var responseTaggable;
@@ -188,9 +187,20 @@ app.get('/postme', function(req, res){
 });
 
 
-app.get('',function(){
+app.get('/loggedin',function(req,res){
+    res.sendFile('public/dashboard.html', {root: __dirname })
+});
 
+app.get('/friendList', function(req, res){
+    FB.api('me/taggable_friends', {fields:'name,picture.width(60).height(60)'}, function(response){
+        if(!res || res.error){
+            res.render('index', {title : 'Fail', friends : []});
+            return;
+        }
 
+        console.log(response.data);
+        res.send(response.data);
+    })
 });
 
 app.get('/friends', function(req, res){

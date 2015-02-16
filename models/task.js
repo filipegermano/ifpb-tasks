@@ -5,9 +5,9 @@ var taskSchema = new mongoose.Schema({
     description : String,
     completed : Boolean,
     createdBy : {type: mongoose.Schema.Types.ObjectId, ref : 'user'},
-    assignedTo :  [{type: mongoose.Schema.Types.ObjectId, ref : 'user'}],
+    assignedTo :  [String],
+//    assignedTo :  [{type: mongoose.Schema.Types.ObjectId, ref : 'user'}],
     created_at : {type: Date, default : Date.now}
 });
 
-
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model('task', taskSchema);

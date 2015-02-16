@@ -29,7 +29,7 @@ router.post('/', function(req,res,next){
                     res.status(500).json('Sorry, the new user could not be saved');
                 }
                 else{
-                    res.status(201).json('Saved new user->'+newUser.name);
+                    res.status(201).json('Saved new user -> '+newUser.name);
                 }
             });
 
@@ -46,8 +46,22 @@ router.post('/', function(req,res,next){
 });
 
 
-router.post('newTask', function(){
-    
+router.post('/newTask/:userId', function(req,res,next){
+    user.findOne({_id : req.params.userId}, function(err, userFoud){
+        if(err){
+            console.error(err);
+            res.status(500).json('Sorry, internal error');
+        }else{
+            task.create(req.body, function(err, createdTask){
+                if(err){
+                    console.error(err);
+                    res.status(500).json('Sorry, internal error (task not saved)');
+                }else{
+                    res.status(201).json('New task created');
+                }
+            });     
+        }
+    });
 });
 
 router.put('/:id', function(req,res,next){
