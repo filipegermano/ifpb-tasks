@@ -24,25 +24,23 @@ router.post('/', function(req,res,next){
         }else if(userFoud === null){
             console.log('will save user');
 
-            user.create(newUser, function(err){
+            user.create(newUser, function(err, userCreated){
                 if(err){
                     res.status(500).json('Sorry, the new user could not be saved');
                 }
                 else{
-                    res.status(201).json('Saved new user -> '+newUser.name);
+                    res.send(userCreated);
                 }
             });
 
         }else{
             console.log('will not save user');
-            user.findByIdAndUpdate(userFoud._id, newUser, function(err, users){
+            user.findByIdAndUpdate(userFoud._id, newUser, function(err, userUpdated){
                 if(err) return next(err);
+                res.send(userUpdated);
             });
-
-            res.status(204).json('User updated');
         }
     });
-
 });
 
 

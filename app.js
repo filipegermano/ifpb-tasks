@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var users = require('./routes/users');
-
+var session = require('express-session');
 var http = require('http');
 
 //--mongo
@@ -34,7 +34,7 @@ passport.serializeUser(function(user, done) {
     done(null, user);
 });
 
-passport.serializeUser(function(obj, done) {
+passport.deserializeUser(function(obj, done) {
     done(null, obj);
 });
 
@@ -72,31 +72,26 @@ function sendPostRequestToCreateUser(id, name){
         host: 'localhost',
         port: 3000,
         path: '/users/',
-        method: 'POST',
+        method : 'POST',
         headers: headers
     };
 
-    var req = http.request(options, function(res) {
-        res.setEncoding('utf-8');
 
-        var responseString = '';
-
-        res.on('data', function(data) {
-            responseString += data;
+    var req = http.request(options, function(response) {
+        var str = '';
+        response.on('data', function (chunk) {
+            console.log(chunk);
+            str += chunk;
         });
 
-        res.on('end', function() {
-            //                var resultObject = JSON.parse(responseString);
-            console.info('post request ended');
+        response.on('end', function () {
+            console.log(str);
         });
-    });
-
-    req.on('error', function(e) {
-        console.error('Error on creating new user');
     });
 
     req.write(userString);
     req.end();
+
 }
 
 // view engine setup
@@ -113,9 +108,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
-
+app.use(session({secret: 'sessionCookie', saveUninitialized: true, resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Session-persisted message middleware
+//app.use(function(req, res, next){
+//    var err = req.session.error,
+//        msg = req.session.notice,
+//        success = req.session.success;
+//
+//    delete req.session.error;
+//    delete req.session.success;
+//    delete req.session.notice;
+//
+//    if (err) res.locals.error = err;
+//    if (msg) res.locals.notice = msg;
+//    if (success) res.locals.success = success;
+//
+//    next();
+//});
 
 //rotas 
 app.get('/auth/facebook', 
@@ -186,7 +198,6 @@ app.get('/postme', function(req, res){
     });
 });
 
-
 app.get('/loggedin',function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname })
 });
@@ -197,8 +208,6 @@ app.get('/friendList', function(req, res){
             res.render('index', {title : 'Fail', friends : []});
             return;
         }
-
-        console.log(response.data);
         res.send(response.data);
     })
 });
@@ -213,16 +222,12 @@ app.get('/friends', function(req, res){
     })
 });
 
-app.get('/index', function(req, res){
-    FB.api('me', function(response){
-        if (!res || res.error) {
-            res.render('index', {title: 'Fail', friends: []});
-            return;
-        }
-        res.send(response);
-    });
+app.get('/userInfo', function(req, res){
+    var user = {};
+    user = req.id;
+    user = req.displayName;
+    res.status(200).json(user);
 });
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

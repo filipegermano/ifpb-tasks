@@ -14,8 +14,9 @@
 }
 
 #newTask #friends{
-    max-height: 350px;
+    max-height: 300px;
     overflow-y: scroll;
+    margin-bottom: 15px;
 }
 
 #newTask #friends .friend{
