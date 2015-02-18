@@ -1,44 +1,52 @@
 (function() {
-    
+
     var app = angular.module('task-module', []);
-    
-    app.controller('TaskController', function(){
 
-        this.selectedFriendsId = [];
-        this.selectedFriendsName = [];
-        this.task = {};
+    app.controller('TaskController', ['$http', function($http){
 
-        this.toogleSelection = function (friendId, friendName){
-            console.log(friendId);
-            console.log(friendName);
-            var index = this.selectedFriendsId.indexOf(friendId);
+        var thisController = this;
+        thisController.selectedFriendsId = [];
+        thisController.selectedFriendsName = [];
+        thisController.task = {};
+
+        thisController.toogleSelection = function (friendId, friendName){
+            var index = thisController.selectedFriendsId.indexOf(friendId);
             if(index > -1){
-                this.selectedFriendsId.splice(index, 1);
-                this.selectedFriendsName.splice(index, 1)
+                thisController.selectedFriendsId.splice(index, 1);
+                thisController.selectedFriendsName.splice(index, 1)
             }else{
-                this.selectedFriendsId.push(friendId);
-                this.selectedFriendsName.push(friendName);
+                thisController.selectedFriendsId.push(friendId);
+                thisController.selectedFriendsName.push(friendName);
             }
-            console.log(this.selectedFriendsId);
-            console.log(this.selectedFriendsName);
         };
 
-        this.createTask = function(){
+        thisController.createTask = function(userId){
+            console.log('new task created by ' + userId)
             var newTask = {
-                name : this.task.name,
-                description : this.task.description,
+                name : thisController.task.name,
+                description : thisController.task.description,
                 assignedTo : []
             };
 
-            for(var i = 0; i > this.selectedFriendsId.length; i++){
+            for(var i = 0; i < thisController.selectedFriendsName.length; i++){
                 var assignedTo = {
-                    friendId : this.selectedFriendsId[i],
-                    friendName : this.selectedFriendsName[i] 
+                    friendId : thisController.selectedFriendsId[i],
+                    friendName : thisController.selectedFriendsName[i] 
                 };
                 newTask.assignedTo.push(assignedTo);
             }
+
+            console.log(newTask);
+
+            $http.post('./../../users/newTask/'+userId, newTask)
+            .success(function(data){
+                console.log(data);
+            })
+            .error(function(data){
+                console.log(data);
+            });
         };
 
-    });
+    }]);
 
 })();

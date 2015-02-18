@@ -5,8 +5,10 @@ var taskSchema = new mongoose.Schema({
     description : String,
     completed : {type: Boolean, default : false},
     createdBy : {type: mongoose.Schema.Types.ObjectId, ref : 'user'},
-    assignedTo :  [{friendId : String, firendName : String}],
-//    assignedTo :  [{type: mongoose.Schema.Types.ObjectId, ref : 'user'}],
+    assignedTo :  [{
+        friendId : String,
+        friendName : String
+    }],
     created_at : {type: Date, default : Date.now}
 });
 

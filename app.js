@@ -27,6 +27,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var tasks = require('./routes/tasks');
 
 var app = express();
 
@@ -108,26 +109,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/tasks', tasks);
 app.use(session({secret: 'sessionCookie', saveUninitialized: true, resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Session-persisted message middleware
-//app.use(function(req, res, next){
-//    var err = req.session.error,
-//        msg = req.session.notice,
-//        success = req.session.success;
-//
-//    delete req.session.error;
-//    delete req.session.success;
-//    delete req.session.notice;
-//
-//    if (err) res.locals.error = err;
-//    if (msg) res.locals.notice = msg;
-//    if (success) res.locals.success = success;
-//
-//    next();
-//});
 
 //rotas 
 app.get('/auth/facebook', 
@@ -223,10 +208,7 @@ app.get('/friends', function(req, res){
 });
 
 app.get('/userInfo', function(req, res){
-    var user = {};
-    user = req.id;
-    user = req.displayName;
-    res.status(200).json(user);
+    res.status(200).json(req.user);
 });
 
 // catch 404 and forward to error handler
