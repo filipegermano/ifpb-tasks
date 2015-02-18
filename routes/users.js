@@ -59,7 +59,7 @@ router.post('/', function(req,res,next){
 
 
 router.post('/newTask/:id', function(req,res,next){
-    user.findOne({facebook_id : req.params.id}, function(err, userFound){
+/*    user.findOne({facebook_id : req.params.id}, function(err, userFound){
         if(err){
             console.log(err);
             res.status(500).json('Sorry, internal error');
@@ -89,7 +89,9 @@ router.post('/newTask/:id', function(req,res,next){
             });
 
         }
-    });
+    });*/
+    
+    res.status(200).json('OK');
 });
 
 

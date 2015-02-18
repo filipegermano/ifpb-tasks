@@ -5,17 +5,30 @@
 
         var thisController = this;
         thisController.friendList = [];
+        thisController.friendListFiltered = [];
         thisController.user = {};
-        
+        thisController.nameToFilter = '';
+
         $http.get('./../../friendList').success(function(data){
+            thisController.friendListFiltered = data;
             thisController.friendList = data;
         }).then(function(){
             $('#loadingIcon').hide();
         });        
-        
+
         $http.get('./../../userInfo').success(function(data){
             thisController.user = data;
         });
-        
+
+        thisController.filterFriend = function(){
+            thisController.friendListFiltered = [];
+            for(key in thisController.friendList){
+                if(thisController.friendList[key].name.toLowerCase().indexOf(thisController.nameToFilter.toLocaleLowerCase()) == 0){
+                    thisController.friendListFiltered.push(thisController.friendList[key]);
+                }
+            }
+        };
+
     }]);
+
 })();

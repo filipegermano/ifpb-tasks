@@ -1,5 +1,3 @@
-$(document).ready(function(){
-    $('#friends').resize(function(){
-        alert('T');
-    });
-});
+function setLabelSelected(element){
+    alert(element);
+} 

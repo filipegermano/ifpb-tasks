@@ -2,7 +2,7 @@
 
     var app = angular.module('task-module', []);
 
-    app.controller('TaskController', ['$http', function($http){
+    app.controller('TaskController', ['$http', '$scope', function($http, $scope){
 
         var thisController = this;
         thisController.selectedFriendsId = [];
@@ -41,12 +41,25 @@
             $http.post('./../../users/newTask/'+userId, newTask)
             .success(function(data){
                 console.log(data);
+
+                alertify.alert('Tarefa enviada com sucesso');
+
+                $('#newTaskForm').trigger("reset");
+                $scope.newTaskForm.$setPristine();
+                $scope.newTaskForm.$setUntouched();
+                resetVariables();
+        
             })
             .error(function(data){
                 console.log(data);
             });
         };
 
-    }]);
+        function resetVariables(){
+            thisController.selectedFriendsId = [];
+            thisController.selectedFriendsName = [];
+            thisController.task = {};
+        }
 
+    }]);
 })();

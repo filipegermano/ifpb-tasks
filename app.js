@@ -139,50 +139,6 @@ app.get('/auth/facebook/callback',
 //    });
 //});
 
-app.get('/postme', function(req, res){    
-    var responseTaggable;
-
-    FB.api('me/taggable_friends', function(response){
-        if (!res || res.error) {
-            res.render('index', {title: 'Fail', friends: []});
-            return;
-        }
-        console.log(response);
-        responseTaggable = response.data;
-
-
-        //        console.log('res tag ' + responseTaggable);
-        var id;
-        for(var i=0; i<responseTaggable.length; i++){
-            console.log(responseTaggable[i].name + '\n');
-            if(responseTaggable[i].name == 'Raquel Oliveira'){
-                id = responseTaggable[i].id;
-                break;
-            }
-        }
-
-        var tags = id;
-        console.log(tags);
-        var body = 'Teste Projeto POS @['+id+']';
-        console.log(body);
-        FB.api('me/ifpb-tasks:create', 'post', {task: "http://samples.ogp.me/737978356323012" , message: body, tags: tags}, function(response) {
-            if(!response || response.error) {
-                console.log(!response ? 'error occurred' : response.error);
-                return;
-            }
-
-            console.log('Post Id: ' + response.id);
-
-            if(response.id){
-                res.status(200).json('foi!');
-            }else{
-                res.status(200).json('não foi!');
-            }
-        });
-
-    });
-});
-
 app.get('/loggedin',function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname })
 });

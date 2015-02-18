@@ -3,14 +3,12 @@
     min-height: 100px;
 }
 
-#newTask form .ng-invalid.ng-dirty{
+#newTask form .ng-invalid-required.ng-dirty{
     border-color: red;
-    border-width: medium;
 }
 
-#newTask form .ng-valid.ng-dirty{
+#newTask form .ng-valid-required.ng-dirty{
     border-color: green;
-    border-width: medium;
 }
 
 #newTask #friends{
@@ -33,3 +31,17 @@
     font-size: medium;
 }
 
+.friendLabel{
+    padding: 5px 5px 5px 5px;
+    margin-left: -15px;
+    width: 110%;
+    transition: background 1.0s ease; 
+}
+
+.friendLabel:hover{
+    background: #45619D;
+}
+
+.friendSelected{
+    background: #45619D;
+}
