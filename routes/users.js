@@ -131,6 +131,8 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
 }
 
 router.get('/:id/tasks', function(req,res){
+    var id = req.params.id;
+    console.log(id);
     task.find({createdBy : req.params.id}, function(err, tasks){
         if(err) {
             res.status(500).json(err);

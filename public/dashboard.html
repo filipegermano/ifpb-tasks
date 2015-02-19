@@ -33,18 +33,18 @@
                 </div>
                 <div class="collapse navbar-collapse" id="menu">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="active"><a href="#">Nova Tarefa</a></li>
-                        <li><a href="#">Minhas tarefas</a></li>
+                        <li class="active"><a href="dashboard">Nova Tarefa</a></li>
+                        <li><a href="myTasks">Tarefas</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
         <div class="container" ng-controller="UserController as userCtrl">
 
-            <h1 class="text-center">IFPB-tasks <small>{{userCtrl.user.displayName}}</small></h1>
+            <h1 class="text-center">IFPB-tasks <small>{{userCtrl.user.name}}</small></h1>
 
             <div class="col-md-6 col-md-offset-3" id="newTask" ng-controller="TaskController as taskCtrl">
-                <form name="newTaskForm" id="newTaskForm" ng-submit="newTaskForm.$valid && taskCtrl.createTask(userCtrl.user.id)" novalidate>
+                <form name="newTaskForm" id="newTaskForm" ng-submit="newTaskForm.$valid && taskCtrl.createTask(userCtrl.user.facebook_id)" novalidate>
                     <div class="form-group">
                         <input name="taskName" id="taskName" class="form-control" ng-model="taskCtrl.task.name" placeholder="Nome da Tarefa" required/>    
                     </div>

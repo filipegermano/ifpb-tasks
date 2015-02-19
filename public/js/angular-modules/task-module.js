@@ -12,6 +12,8 @@
         thisController.task.prioprity;
         thisController.btnSelected = 0;
 
+        thisController.tasksCreated = [];
+
         thisController.toogleSelection = function (friendId, friendName){
             var index = thisController.selectedFriendsId.indexOf(friendId);
             if(index > -1){
@@ -52,7 +54,7 @@
                 console.log(data);
 
                 swal("Tarefa Enviada", "Sua tarefa chegará ao seu amigo em breve", "success");
-                
+
                 $('#newTaskForm').trigger('reset');
                 $scope.newTaskForm.$setPristine();
                 $scope.newTaskForm.$setUntouched();
@@ -82,6 +84,17 @@
         thisController.isSelected = function(checkBtn){
             return this.btnSelected === checkBtn;
         }
+
+        $http.get('./../../userInfo').success(function(user){
+            $http.get('./../../users/'+user._id+'/tasks').success(function(data){
+                thisController.tasksCreated = data;
+                console.log(data);
+            }).error(function(data){
+                console.log(data);
+            });
+
+        });
+
 
         function resetVariables(){
             thisController.selectedFriendsId = [];

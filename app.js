@@ -61,7 +61,6 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(obj, done) {
-    console.log(obj.id);
     done(null, obj);
 });
 
@@ -173,6 +172,10 @@ app.get('/dashboard', ensureAuthenticated,function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname })
 });
 
+app.get('/myTasks', ensureAuthenticated,function(req,res){
+    res.sendFile('public/tasks.html', {root: __dirname })
+});
+
 app.get('/friendList', function(req, res){
     FB.api('me/taggable_friends', {fields:'name,picture.width(60).height(60)'}, function(response){
         if(!res || res.error){
@@ -193,8 +196,14 @@ app.get('/friends', function(req, res){
     })
 });
 
-app.get('/userInfo', function(req, res){
-    res.status(200).json(req.user);
+app.get('/userInfo', ensureAuthenticated ,function(req, res){
+    user.findOne({facebook_id : req.user.id}, function(err, user){
+        if(err){
+            res.status(500).json(err);
+        }else{
+            res.status(200).json(user);
+        }
+    });
 });
 
 // catch 404 and forward to error handler
@@ -231,9 +240,10 @@ app.use(function(err, req, res, next) {
 function ensureAuthenticated(req, res, next) {
     console.log('info ' + req.user);
     console.log('sesion ' + req.session);
-    if (req.isAuthenticated()) { return next(); }
+    if (req.isAuthenticated()) { 
+        return next();
+    }
     res.redirect('/');
-    next();
 }
 
 

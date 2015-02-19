@@ -4,7 +4,8 @@ var taskSchema = new mongoose.Schema({
     name: String,
     description : String,
     completed : {type: Boolean, default : false},
-    createdBy : {type: mongoose.Schema.Types.ObjectId, ref : 'user'},
+//    createdBy : {type: mongoose.Schema.Types.ObjectId, ref : 'user'},
+    createdBy : String,
     assignedTo :  [{
         friendId : String,
         friendName : String
