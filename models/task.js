@@ -9,6 +9,9 @@ var taskSchema = new mongoose.Schema({
         friendId : String,
         friendName : String
     }],
+    deadline : Date,
+    completedDate : Date,
+    priority : String,
     created_at : {type: Date, default : Date.now}
 });
 

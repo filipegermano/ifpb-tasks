@@ -1,0 +1,13 @@
+#loginBtn{
+    background: #3B5998;
+    color: white;
+    font-size: 30px;
+    height: 80px;
+    margin-top: 15px;
+}
+
+#loginBtn span{
+    color: white;
+    font-size: 55px;
+    margin-top: -5px;
+}

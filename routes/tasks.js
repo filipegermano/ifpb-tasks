@@ -15,6 +15,7 @@ router.get('/', function(req,res){
 });
 
 
+
 router.delete('/all', function(req,res){
     task.collection.remove( function (err) {
         if (err) throw err;

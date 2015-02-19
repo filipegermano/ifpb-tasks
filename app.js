@@ -7,6 +7,19 @@ var bodyParser = require('body-parser');
 var users = require('./routes/users');
 var session = require('express-session');
 var http = require('http');
+var user = require('./models/user.js');
+//fb
+var FB = require('fb');
+//Passport
+var passport = require('passport');
+var config = require('./configurations/config.js');
+var FacebookStrategy = require('passport-facebook').Strategy;
+
+//var routes = require('./public/index');
+var users = require('./routes/users');
+var tasks = require('./routes/tasks');
+
+var app = express();
 
 //--mongo
 var mongoose = require('mongoose');
@@ -18,26 +31,51 @@ mongoose.connect('mongodb://localhost/ifpb-tasks', function(err){
     }
 });
 
-//fb
-var FB = require('fb');
-//Passport
-var passport = require('passport');
-var config = require('./configurations/config.js');
-var FacebookStrategy = require('passport-facebook').Strategy;
+//app.get('/users', ensureAuthenticated, function(req, res, next){
+//    console.log('teste');
+//    next();
+//});
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var tasks = require('./routes/tasks');
+// uncomment after placing your favicon in /public
+//app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(logger('dev'));
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-var app = express();
+//app.use('/', routes);
+
+app.use('/users', users);
+
+app.use('/tasks', tasks);
+app.use(session({secret: 'sessionCookie', saveUninitialized: true, resave: true}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static(path.join(__dirname, 'public')));
 
 passport.serializeUser(function(user, done) {
     done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
+    console.log(obj.id);
     done(null, obj);
 });
+
+//passport.serializeUser(function(user, done) {
+//    console.log('serializeUser: ' + user._id)
+//    done(null, user);
+//});
+//
+//passport.deserializeUser(function(obj, done) {
+//    user.findById(obj.id, function(err, user) {
+//        done(err, user);
+//        done(err, user);
+//    });
+//});
 
 passport.use(new FacebookStrategy({
     clientID: config.facebook_api_key,
@@ -54,6 +92,7 @@ passport.use(new FacebookStrategy({
     });
 }   
                                  ));
+
 
 
 function sendPostRequestToCreateUser(id, name){
@@ -95,35 +134,26 @@ function sendPostRequestToCreateUser(id, name){
 
 }
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', routes);
-app.use('/users', users);
-app.use('/tasks', tasks);
-app.use(session({secret: 'sessionCookie', saveUninitialized: true, resave: true}));
-app.use(passport.initialize());
-app.use(passport.session());
-
 //rotas 
-app.get('/auth/facebook', 
-        passport.authenticate(
-    'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']}
-));
+//app.get('/auth/facebook', 
+//        passport.authenticate(
+//    'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']}
+//));
+
+app.get('/test', function(req,res,next){
+    console.log('Is Authenticated '+ req.isAuthenticated());
+    res.status(200).json(req.isAuthenticated());
+});
+
+app.get('/auth/facebook',function(req, res, next){ 
+    passport.authenticate(
+        'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']})(req, res, next);
+});
 
 app.get('/auth/facebook/callback',
         passport.authenticate(
     'facebook',
-    {successRedirect:  '/loggedin',
+    {successRedirect:  '/dashboard',
      failureRedirect: '/'}),
         function(req, res) {
     res.redirect('/');
@@ -139,7 +169,7 @@ app.get('/auth/facebook/callback',
 //    });
 //});
 
-app.get('/loggedin',function(req,res){
+app.get('/dashboard', ensureAuthenticated,function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname })
 });
 
@@ -197,6 +227,14 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
+
+function ensureAuthenticated(req, res, next) {
+    console.log('info ' + req.user);
+    console.log('sesion ' + req.session);
+    if (req.isAuthenticated()) { return next(); }
+    res.redirect('/');
+    next();
+}
 
 
 module.exports = app;

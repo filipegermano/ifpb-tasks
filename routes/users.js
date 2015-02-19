@@ -7,17 +7,13 @@ var task = require('../models/task.js');
 var FB = require('fb');
 var config = require('./../configurations/config.js');
 
-//router.get('/test', function(req,res){
-//    FB.api('me/taggable_friends', {fields:'name,picture.width(60).height(60)'}, function(response){
-//        if(!res || res.error){
-//            res.render('index', {title : 'Fail', friends : []});
-//            return;
-//        }
-//        res.send(response.data);
-//    })
-//
-//});
-
+//function isAuthenticated(req, res, next) {
+//    console.log('User '+req.user);
+//    console.log(req.isAuthenticated());
+//    if (req.isAuthenticated())
+//        return next();
+//    res.redirect('/');
+//};
 
 router.get('/', function(req, res, next) {
     user.find(function(err,users){
@@ -59,7 +55,7 @@ router.post('/', function(req,res,next){
 
 
 router.post('/newTask/:id', function(req,res,next){
-/*    user.findOne({facebook_id : req.params.id}, function(err, userFound){
+    user.findOne({facebook_id : req.params.id}, function(err, userFound){
         if(err){
             console.log(err);
             res.status(500).json('Sorry, internal error');
@@ -84,14 +80,13 @@ router.post('/newTask/:id', function(req,res,next){
                             console.log(err);
                         }
                     });
-                    tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo);
+                   // tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo);
                 }
             });
 
         }
-    });*/
-    
-    res.status(200).json('OK');
+    });
+    console.log(req.body);
 });
 
 
@@ -134,6 +129,16 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
         }
     });
 }
+
+router.get('/:id/tasks', function(req,res){
+    task.find({createdBy : req.params.id}, function(err, tasks){
+        if(err) {
+            res.status(500).json(err);
+        }else{
+            res.status(200).json(tasks);
+        }
+    });
+});
 
 router.put('/:id', function(req,res,next){
     user.findByIdAndUpdate(req.params.id, req.body, function(err, users){

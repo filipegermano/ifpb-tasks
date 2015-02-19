@@ -11,6 +11,10 @@
     border-color: green;
 }
 
+#newTask #priority{
+    margin-bottom: 15px;
+}
+
 #newTask #friends{
     max-height: 300px;
     overflow-y: scroll;
@@ -31,17 +35,26 @@
     font-size: medium;
 }
 
-.friendLabel{
+#newTask #deadline{
+    background-color: white;
+}
+
+#newTask .btnSelected {
+    background: #E6E6E6;
+    border: solid #49AFEA 1px;
+}
+
+#newTask .friendLabel{
     padding: 5px 5px 5px 5px;
     margin-left: -15px;
     width: 110%;
     transition: background 1.0s ease; 
 }
 
-.friendLabel:hover{
+#newTask .friendLabel:hover{
     background: #45619D;
 }
 
-.friendSelected{
+#newTask .friendSelected{
     background: #45619D;
 }

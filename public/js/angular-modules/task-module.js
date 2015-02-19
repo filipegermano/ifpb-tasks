@@ -9,6 +9,9 @@
         thisController.selectedFriendsName = [];
         thisController.task = {};
 
+        thisController.task.prioprity;
+        thisController.btnSelected = 0;
+
         thisController.toogleSelection = function (friendId, friendName){
             var index = thisController.selectedFriendsId.indexOf(friendId);
             if(index > -1){
@@ -22,10 +25,16 @@
 
         thisController.createTask = function(userId){
             console.log('new task created by ' + userId)
+
+            deadLineArray = thisController.task.deadline.split("/");
+            thisController.task.deadline = new Date(deadLineArray[2], deadLineArray[1] - 1, deadLineArray[0]);
+
             var newTask = {
                 name : thisController.task.name,
                 description : thisController.task.description,
-                assignedTo : []
+                assignedTo : [],
+                priority : thisController.task.priority,
+                deadline : thisController.task.deadline
             };
 
             for(var i = 0; i < thisController.selectedFriendsName.length; i++){
@@ -42,18 +51,37 @@
             .success(function(data){
                 console.log(data);
 
-                alertify.alert('Tarefa enviada com sucesso');
-
-                $('#newTaskForm').trigger("reset");
+                swal("Tarefa Enviada", "Sua tarefa chegará ao seu amigo em breve", "success");
+                
+                $('#newTaskForm').trigger('reset');
                 $scope.newTaskForm.$setPristine();
                 $scope.newTaskForm.$setUntouched();
                 resetVariables();
-        
+
             })
             .error(function(data){
                 console.log(data);
             });
         };
+
+        thisController.selectBtn = function(btn){
+            this.btnSelected = btn;
+            switch(btn){
+                case 1:
+                    thisController.task.priority = 'Baixa';
+                    break;
+                case 2: 
+                    thisController.task.priority = 'Média';
+                    break;
+                case 3:
+                    thisController.task.priority = 'Alta';
+                    break;
+            }
+        }
+
+        thisController.isSelected = function(checkBtn){
+            return this.btnSelected === checkBtn;
+        }
 
         function resetVariables(){
             thisController.selectedFriendsId = [];

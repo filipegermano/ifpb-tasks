@@ -7,6 +7,7 @@
         thisController.friendList = [];
         thisController.friendListFiltered = [];
         thisController.user = {};
+
         thisController.nameToFilter = '';
 
         $http.get('./../../friendList').success(function(data){
@@ -30,5 +31,13 @@
         };
 
     }]);
+
+    //
+    //    app.controller('BtnPriorityController', function(){
+    //        this.btnSelected = 0;
+    //
+    //
+    //
+    //    });
 
 })();
