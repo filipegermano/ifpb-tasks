@@ -39,7 +39,7 @@ router.post('/', function(req,res,next){
                     res.status(500).json('Sorry, the new user could not be saved');
                 }
                 else{
-                    res.send(userCreated);
+                    res.status(201).json('new user');
                 }
             });
 
@@ -47,7 +47,7 @@ router.post('/', function(req,res,next){
             console.log('will not save user');
             user.findByIdAndUpdate(userFound._id, newUser, function(err, userUpdated){
                 if(err) return next(err);
-                res.send(userUpdated);
+                res.status(200).json('old user');
             });
         }
     });
@@ -70,23 +70,22 @@ router.post('/newTask/:id', function(req,res,next){
                 }else{
                     res.status(201).json('New task created');
                     userFound.tasksCreated.push(createdTask._id);
-                    console.log(userFound);
                     userFound.save(function(err){
                         if(err){
                             console.log(err);
                         }
                     });
-                   // tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo);
+                    tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo, newTask.status);
                 }
             });
 
         }
     });
-    console.log(req.body);
+
 });
 
 
-function tagFriends(taskName, taskDescription,taskId , assignedTo){
+function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
 
     var mentions = '';
     var tags = [];
@@ -98,7 +97,7 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
 
     var tagsSeparatedByComma = tags.join();
 
-    var msg = '['+taskName+'] - ' + taskDescription + ' ' + mentions;
+    var msg = 'Nova Tarefa ['+taskName+'] - ' + ' Status: ' + status + ' ' + mentions;
 
 
     FB.api('me/ifpb-tasks:create', 'post', {
@@ -111,10 +110,10 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
         message: msg, 
         tags: tags},
         function(response) {
-            if(!response || response.error) {
-                console.log(!response ? 'error occurred' : response.error);
-                return;
-            }
+        if(!response || response.error) {
+            console.log(!response ? 'error occurred' : response.error);
+            return;
+        }
 
         console.log('Post Id: ' + response.id);
 
@@ -125,6 +124,16 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
         }
     });
 }
+
+router.get('/task/:taskId/facebookRef', function(req,res){
+    FB.api('me/taggable_friends', function(response){
+        if(!res || res.error){
+            res.render('index', {title : 'Fail', friends : []});
+            return;
+        }
+        res.send(response.data);
+    })
+});
 
 //router.get('/:id/tasks', function(req,res){
 //    var id = req.params.id;
@@ -143,13 +152,13 @@ router.get('/:id/tasks', function(req,res){
     var id = req.params.id;
     console.log(id);
     task.find({createdBy : req.params.id}).sort({deadline: 'desc'}).exec(
-    function(err, tasks){
-        if(err) {
-            res.status(500).json(err);
-        }else{
-            res.status(200).json(tasks);
-        }
-    });
+        function(err, tasks){
+            if(err) {
+                res.status(500).json(err);
+            }else{
+                res.status(200).json(tasks);
+            }
+        });
 });
 
 router.put('/:id', function(req,res,next){
