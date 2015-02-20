@@ -58,3 +58,7 @@
 #newTask .friendSelected{
     background: #45619D;
 }
+
+#newTask .date{
+    margin-bottom: 15px;
+}

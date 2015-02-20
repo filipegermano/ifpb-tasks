@@ -5,6 +5,8 @@
         <link href="libs/bootstrap/css/bootstrap.min.cerulean.css" rel="stylesheet" type="text/css">
         <link href="stylesheets/style.css" rel="stylesheet" type="text/css"/>
         <link href="libs/sweetalert/lib/sweet-alert.css" rel="stylesheet" type="text/css"/>
+        <link href="libs/font-awesome-4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href="stylesheets/tasks.css" rel="stylesheet" type="text/css"> 
         <!--
 <link href="libs/pickadate.js-3.5.3/lib/compressed/themes/default.css" rel="stylesheet" type="text/css"/>
 <link href="libs/pickadate.js-3.5.3/lib/compressed/themes/default.date.css" rel="stylesheet" type="text/css"/>
@@ -15,7 +17,7 @@
         <script src="js/angular-modules/app.js" type="text/javascript"></script>
         <script src="js/angular-modules/task-module.js" type="text/javascript"></script>
         <script src="libs/sweetalert/lib/sweet-alert.min.js" type="text/javascript"></script>
-<!--
+        <!--
 <script src="libs/pickadate.js-3.5.3/lib/compressed/picker.js" type="text/javascript"></script>
 <script src="libs/pickadate.js-3.5.3/lib/compressed/picker.date.js" type="text/javascript"></script>
 <script src="libs/pickadate.js-3.5.3/lib/compressed/translations/pt_BR.js" charset="UTF-8" type="text/javascript"></script>
@@ -41,10 +43,28 @@
             </div>
         </nav>
         <div class="container" ng-controller="TaskController as taskCtrl">
+            <h2 class="text-center">Tarefas</h2>
             <p>{{userCtrl.user.id}}</p>
-            <div id="tasks">
+            <div id="tasks" class="col-md-6 col-md-offset-3">
                 <div class="task" ng-repeat="task in taskCtrl.tasksCreated">
-                    <p>{{task.name}}</p>
+                    <h4 class="taskName">{{task.name}}</h4>
+                    <p class="taskDescription">{{task.description}}</p>
+                    <p class="taskCreatedAt"><span class="fa fa-calendar"></span>
+                        Data da criação: {{ task.createdAt | date : 'dd/MM/yyyy h:mm:ss a'}}</p>
+                    <p class="taskDeadline"><span class="fa fa-calendar"></span> 
+                        Data limite: {{task.deadline | date : 'dd/MM/yyyy'}}</p>
+                    
+                    <p class="taskPriority">
+                        <span class="fa fa-warning" 
+                              ng-class="task.priority == 'Baixa' ? 'baixa' : (task.priority == 'Média' ? 'media' : 'alta')"></span>                                            Prioridade {{task.priority}}</p>
+                    <!--                    <p>{{task.assignedTo}}</p>-->
+                    
+                    <h5>Responsáveis</h5>
+                    <div class="assignedTo" ng-repeat="(key, friend) in task.assignedTo">
+                        <p class="taskFriendName">{{friend.friendName}}</p>
+                    </div>
+                    <span class="label pull-right labelStatus" ng-class="task.status === 'em aberto' ? 'label-danger' :
+                                    (task.priority === 'em execução' ? 'label-primary' : 'label-success')">{{task.status}}</span>
                 </div>
             </div>
         </div>

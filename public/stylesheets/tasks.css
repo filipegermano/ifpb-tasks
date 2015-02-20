@@ -1,0 +1,22 @@
+#tasks .task {
+    border-bottom: 2px solid #2B3856;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+#tasks .task .baixa{
+    color: #2B60DE;
+}
+
+#tasks .task .media{
+    color: #FDD017;
+}
+
+#tasks .task .alta{
+    color: #E42217;
+}
+
+#tasks .task .labelStatus{
+    margin-top: -20px;
+    font-size: 15px;
+}

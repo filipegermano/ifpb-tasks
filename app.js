@@ -87,12 +87,11 @@ passport.use(new FacebookStrategy({
     process.nextTick(function() {
 
         sendPostRequestToCreateUser(profile._json.id, profile._json.name);
+
         return done(null, profile);
     });
 }   
                                  ));
-
-
 
 function sendPostRequestToCreateUser(id, name){
     var user = {
@@ -100,36 +99,39 @@ function sendPostRequestToCreateUser(id, name){
         name : name
     };
 
-    var userString = JSON.stringify(user);
-
-    var headers = {
-        'Content-Type': 'application/json',
-        'Content-Length': userString.length
-    };
-
-    var options = {
-        host: 'localhost',
-        port: 3000,
-        path: '/users/',
-        method : 'POST',
-        headers: headers
-    };
-
-
-    var req = http.request(options, function(response) {
-        var str = '';
-        response.on('data', function (chunk) {
-            console.log(chunk);
-            str += chunk;
+        var userString = JSON.stringify(user);
+    
+        var headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': userString.length
+        };
+    
+        var options = {
+            host: 'localhost',
+            port: 3000,
+            path: '/users/',
+            method : 'POST',
+            headers: headers
+        };
+    
+        var req = http.request(options, function(response) {
+            var str = '';
+            response.on('data', function (chunk) {
+                console.log(chunk);
+                str += chunk;
+            });
+    
+            response.on('end', function () {
+                console.log(str);
+            });
         });
-
-        response.on('end', function () {
-            console.log(str);
-        });
-    });
-
-    req.write(userString);
-    req.end();
+    
+        req.write(userString);
+        req.end();
+    
+//    app.post('/users', function(req, res, next){
+//        console.log(res.toString());
+//    });
 
 }
 

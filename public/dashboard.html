@@ -53,8 +53,10 @@
                                   placeholder="Descrição da tarefa" required></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <input name="deadLine" id="deadline" class="form-control" ng-model="taskCtrl.task.deadline" placeholder="Data Limite" required/>
+                    <div class="input-group date">
+                        <input name="deadline" id="deadline" class="form-control"
+                               ng-model="taskCtrl.task.deadline" placeholder="Data Limite" required/>
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
                     </div>
 
                     <label>Prioridade: </label>

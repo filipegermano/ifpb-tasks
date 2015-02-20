@@ -27,8 +27,9 @@
 
         thisController.createTask = function(userId){
             console.log('new task created by ' + userId)
-
-            deadLineArray = thisController.task.deadline.split("/");
+            console.log(thisController.task.deadline);
+            deadLineArray = thisController.task.deadline.split('/');
+            console.log(deadLineArray);
             thisController.task.deadline = new Date(deadLineArray[2], deadLineArray[1] - 1, deadLineArray[0]);
 
             var newTask = {
@@ -38,7 +39,6 @@
                 priority : thisController.task.priority,
                 deadline : thisController.task.deadline
             };
-
             for(var i = 0; i < thisController.selectedFriendsName.length; i++){
                 var assignedTo = {
                     friendId : thisController.selectedFriendsId[i],
@@ -94,7 +94,6 @@
             });
 
         });
-
 
         function resetVariables(){
             thisController.selectedFriendsId = [];

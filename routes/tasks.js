@@ -14,8 +14,6 @@ router.get('/', function(req,res){
     });
 });
 
-
-
 router.delete('/all', function(req,res){
     task.collection.remove( function (err) {
         if (err) throw err;
@@ -24,5 +22,12 @@ router.delete('/all', function(req,res){
     res.status(200).json('All taks removed');
 })
 
+router.delete('/:id', function(req,res,next){
+    console.log('test');
+    task.findByIdAndRemove(req.params.id, function(err, tasks){
+        if(err) return next(err);
+        res.status(200).json(tasks);
+    });
+});
 
 module.exports = router;

@@ -61,6 +61,7 @@ router.post('/newTask/:id', function(req,res,next){
             res.status(500).json('Sorry, internal error');
         }else{
             var newTask = req.body;
+            newTask.status = 'em aberto';
             newTask.createdBy = userFound._id;
             task.create(newTask, function(err, createdTask){
                 if(err){
@@ -70,11 +71,6 @@ router.post('/newTask/:id', function(req,res,next){
                     res.status(201).json('New task created');
                     userFound.tasksCreated.push(createdTask._id);
                     console.log(userFound);
-                    //                    user.findByIdAndUpdate(userFound._id, userFound, function(err, userUpdated){
-                    //                        if(err){
-                    //                            console.log(err);
-                    //                        }
-                    //                    });
                     userFound.save(function(err){
                         if(err){
                             console.log(err);
@@ -130,10 +126,24 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo){
     });
 }
 
+//router.get('/:id/tasks', function(req,res){
+//    var id = req.params.id;
+//    console.log(id);
+//    task.find({createdBy : req.params.id}, function(err, tasks){
+//        if(err) {
+//            res.status(500).json(err);
+//        }else{
+//            res.status(200).json(tasks);
+//        }
+//    });
+//});
+
+
 router.get('/:id/tasks', function(req,res){
     var id = req.params.id;
     console.log(id);
-    task.find({createdBy : req.params.id}, function(err, tasks){
+    task.find({createdBy : req.params.id}).sort({deadline: 'desc'}).exec(
+    function(err, tasks){
         if(err) {
             res.status(500).json(err);
         }else{
