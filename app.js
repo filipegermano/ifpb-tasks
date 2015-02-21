@@ -31,10 +31,6 @@ mongoose.connect('mongodb://localhost/ifpb-tasks', function(err){
     }
 });
 
-//app.get('/users', ensureAuthenticated, function(req, res, next){
-//    console.log('teste');
-//    next();
-//});
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -64,26 +60,14 @@ passport.deserializeUser(function(obj, done) {
     done(null, obj);
 });
 
-//passport.serializeUser(function(user, done) {
-//    console.log('serializeUser: ' + user._id)
-//    done(null, user);
-//});
-//
-//passport.deserializeUser(function(obj, done) {
-//    user.findById(obj.id, function(err, user) {
-//        done(err, user);
-//        done(err, user);
-//    });
-//});
-
-passport.use(new FacebookStrategy({
+passport.use('facebook', new FacebookStrategy({
     clientID: config.facebook_api_key,
     clientSecret: config.facebook_api_secret,
     callbackURL: config.callback_url
-},
-                                  function(accessToken, refreshToken, profile, done) {
-    FB.setAccessToken(accessToken);
+},                                         
+function(accessToken, refreshToken, profile, done) {
 
+    FB.setAccessToken(accessToken);
     process.nextTick(function() {
 
         sendPostRequestToCreateUser(profile._json.id, profile._json.name);
@@ -91,47 +75,62 @@ passport.use(new FacebookStrategy({
         return done(null, profile);
     });
 }   
-                                 ));
+));
 
-function sendPostRequestToCreateUser(id, name){
+passport.use('facebookRef', new FacebookStrategy({
+    clientID: config.facebook_api_key,
+    clientSecret: config.facebook_api_secret
+},                                         
+function(accessToken, refreshToken, profile, done) {
+
+    FB.setAccessToken(accessToken);
+    process.nextTick(function() {
+        return done(null, profile);
+    });
+}   
+));
+
+
+function sendPostRequestToCreateUser(id, name, accessToken){
     var user = {
         facebook_id : id,
         name : name
     };
 
-        var userString = JSON.stringify(user);
-    
-        var headers = {
-            'Content-Type': 'application/json',
-            'Content-Length': userString.length
-        };
-    
-        var options = {
-            host: 'localhost',
-            port: 3000,
-            path: '/users/',
-            method : 'POST',
-            headers: headers
-        };
-    
-        var req = http.request(options, function(response) {
-            var str = '';
-            response.on('data', function (chunk) {
-                console.log(chunk);
-                str += chunk;
-            });
-    
-            response.on('end', function () {
-                console.log(str);
-            });
+    var userString = JSON.stringify(user);
+
+    var headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': userString.length
+    };
+
+    var options = {
+        host: 'localhost',
+        port: 3000,
+        path: '/users/',
+        method : 'POST',
+        headers: headers
+    };
+
+    var jsonResponse;
+    var req = http.request(options, function(response) {
+
+        response.on('data', function (chunk) {
+            jsonResponse = chunk;
         });
-    
-        req.write(userString);
-        req.end();
-    
-//    app.post('/users', function(req, res, next){
-//        console.log(res.toString());
-//    });
+
+        response.on('end', function (str) {
+            console.log('Response from create user ' + jsonResponse);
+        });
+    });
+
+    req.write(userString);
+    req.end();
+
+    return jsonResponse;
+    //    app.post('/users', function(req, res, next){
+    //        console.log(res.toString());
+    //    });
 
 }
 
@@ -141,29 +140,44 @@ function sendPostRequestToCreateUser(id, name){
 //    'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']}
 //));
 
-app.get('/test', function(req,res,next){
-    console.log('Is Authenticated '+ req.isAuthenticated());
-    res.status(200).json(req.isAuthenticated());
+app.get('/auth/facebook', function(req,res,next){
+    passport.authenticate('facebook',{scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']})
+    (req,res,next);
 });
 
-app.get('/auth/facebook',function(req, res, next){ 
-    passport.authenticate(
-        'facebook', {scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']})(req, res, next);
+app.get('/auth/facebookRef/:id', function(req,res,next){
+    passport.authenticate('facebookRef',{callbackURL: config.callback_url + "/task/" + req.params.id,
+                                         scope: ['email', 'user_friends', 'publish_actions', 'manage_friendlists']})
+    (req,res,next);
 });
 
-app.get('/auth/facebook/callback',
-        passport.authenticate(
-    'facebook',
-    {successRedirect:  '/dashboard',
-     failureRedirect: '/'}),
-        function(req, res) {
+//app.get('/auth/facebookRef/:id', function(req,res,next){
+//    passport.authenticate(
+//        'facebook',
+//        {callbackURL : config.callback_url})(req, res, next);
+//});
+
+app.get('/auth/facebook/callback', passport.authenticate(
+    'facebook', {successRedirect : '/dashboard', faulureRedirect: '/'}),
+        function(req,res){
     res.redirect('/');
 });
+
+app.get('/auth/facebook/callback/task/:id', function(req,res,next) {
+    passport.authenticate(
+        'facebookRef',{
+            callbackURL: config.callback_url + "/task/" + req.params.id,
+            successRedirect:'/users/task/facebookRef/'+req.params.id,
+            failureRedirect:'/'
+        }
+    ) (req,res,next);
+});
+
 
 //app.get('/checkPermissions', function(req, res){
 //    FB.api('me/permissions',function (response) {
 //        if (!response || !response.error) {
-//            console.log(response);
+//        .    console.log(response);
 //        
 //        }
 //        res.status(200).json(response);
@@ -171,12 +185,17 @@ app.get('/auth/facebook/callback',
 //});
 
 app.get('/dashboard', ensureAuthenticated,function(req,res){
-    res.sendFile('public/dashboard.html', {root: __dirname })
+    res.sendFile('public/dashboard.html', {root: __dirname });
 });
 
 app.get('/myTasks', ensureAuthenticated,function(req,res){
-    res.sendFile('public/tasks.html', {root: __dirname })
+    res.sendFile('public/myTasks.html', {root: __dirname });
 });
+
+app.get('/task/:id', ensureAuthenticatedForTask, function(req,res,next){
+    res.redirect('/auth/facebookRef/'+req.params.id);
+});
+
 
 app.get('/friendList', function(req, res){
     FB.api('me/taggable_friends', {fields:'name,picture.width(60).height(60)'}, function(response){
@@ -198,7 +217,7 @@ app.get('/friends', function(req, res){
     })
 });
 
-app.get('/userInfo', ensureAuthenticated ,function(req, res){
+app.get('/userInfo', ensureAuthenticated,function(req, res){
     user.findOne({facebook_id : req.user.id}, function(err, user){
         if(err){
             res.status(500).json(err);
@@ -239,14 +258,22 @@ app.use(function(err, req, res, next) {
     });
 });
 
+function ensureAuthenticatedForTask(req, res, next) {
+    if (req.isAuthenticated()) { 
+        return next();
+    }else{
+        console.log('ensureAuthenticatedForTask '+req.params.id);
+        res.redirect('/auth/facebookRef/'+req.params.id);
+    }
+}
+
+
 function ensureAuthenticated(req, res, next) {
-    console.log('info ' + req.user);
-    console.log('sesion ' + req.session);
+    console.log('Authenticated ' + req.isAuthenticated());
     if (req.isAuthenticated()) { 
         return next();
     }
-    res.redirect('/');
+    res.redirect('/auth/facebook');
 }
-
 
 module.exports = app;

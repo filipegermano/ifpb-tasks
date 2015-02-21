@@ -30,4 +30,11 @@ router.delete('/:id', function(req,res,next){
     });
 });
 
+router.get('/task/:id', function(req,res,next){
+    task.findById(req.params.id, function(err, task){
+        if(err) return next(err);
+        res.status(200).json(task);
+    });
+});
+
 module.exports = router;
