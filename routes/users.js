@@ -110,7 +110,11 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
         },
         message: msg, 
         tags: tags},
+<<<<<<< HEAD
            function(response) {
+=======
+        function(response) {
+>>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
         if(!response || response.error) {
             console.log(!response ? 'error occurred' : response.error);
             return;
@@ -126,13 +130,19 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
     });
 }
 
+<<<<<<< HEAD
 router.get('/task/facebookRef/:taskId', function(req,res,next){
     console.log('Id on tasks '+ req.params.taskId);
     FB.api('me', function(response){
+=======
+router.get('/task/:taskId/facebookRef', function(req,res){
+    FB.api('me/taggable_friends', function(response){
+>>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
         if(!res || res.error){
             res.render('index', {title : 'Fail', friends : []});
             return;
         }
+<<<<<<< HEAD
 
         user.findOne({facebook_id : response.id},function(err,userFound){
             if(err){
@@ -175,6 +185,23 @@ router.get('/task/facebookRef/:taskId', function(req,res,next){
         });    
     });
 });
+=======
+        res.send(response.data);
+    })
+});
+
+//router.get('/:id/tasks', function(req,res){
+//    var id = req.params.id;
+//    console.log(id);
+//    task.find({createdBy : req.params.id}, function(err, tasks){
+//        if(err) {
+//            res.status(500).json(err);
+//        }else{
+//            res.status(200).json(tasks);
+//        }
+//    });
+//});
+>>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
 
 
 router.get('/:id/tasks', function(req,res){
@@ -188,6 +215,7 @@ router.get('/:id/tasks', function(req,res){
                 res.status(200).json(tasks);
             }
         });
+<<<<<<< HEAD
 });
 
 
@@ -207,6 +235,8 @@ router.get('/:id/tasksAssigned', function(req,res){
             });
         }
     });
+=======
+>>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
 });
 
 
