@@ -1,5 +1,5 @@
 (function() {
-    var app = angular.module('iftasks', ['task-module']);
+    var app = angular.module('iftasks', ['task-module','task-received']);
 
     app.controller('UserController', ['$http', function($http){
 
@@ -31,13 +31,4 @@
         };
 
     }]);
-
-    //
-    //    app.controller('BtnPriorityController', function(){
-    //        this.btnSelected = 0;
-    //
-    //
-    //
-    //    });
-
 })();

@@ -23,21 +23,20 @@ router.delete('/all', function(req,res){
 })
 
 router.delete('/:id', function(req,res,next){
-    console.log('test');
     task.findByIdAndRemove(req.params.id, function(err, tasks){
         if(err) return next(err);
         res.status(200).json(tasks);
     });
 });
 
-<<<<<<< HEAD
-router.get('/task/:id', function(req,res,next){
-=======
+
 router.get('/:id', function(req,res,next){
->>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
+
     task.findById(req.params.id, function(err, task){
-        if(err) return next(err);
-        res.status(200).json(task);
+        if(err) {
+            res.status(500).json(err);
+        }
+            res.status(200).json(task);
     });
 });
 

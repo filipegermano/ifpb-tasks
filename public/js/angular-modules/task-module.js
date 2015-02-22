@@ -96,15 +96,15 @@
         });
         
 
-        $http.get('./../../../../userInfo').success(function(user){
-            $http.get('./../../../../users/'+user._id+'/tasksAssigned').success(function(data){
-                thisController.tasksAssigned = data;
-                console.log(data);
-            }).error(function(data){
-                console.log(data);
-            });
-
-        });
+//        $http.get('./../../../../userInfo').success(function(user){
+//            $http.get('./../../../../users/'+user._id+'/tasksAssigned').success(function(data){
+//                thisController.tasksAssigned = data;
+//                console.log(data);
+//            }).error(function(data){
+//                console.log(data);
+//            });
+//
+//        });
 
         function resetVariables(){
             thisController.selectedFriendsId = [];

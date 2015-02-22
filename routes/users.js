@@ -110,11 +110,7 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
         },
         message: msg, 
         tags: tags},
-<<<<<<< HEAD
            function(response) {
-=======
-        function(response) {
->>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
         if(!response || response.error) {
             console.log(!response ? 'error occurred' : response.error);
             return;
@@ -130,65 +126,56 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
     });
 }
 
-<<<<<<< HEAD
 router.get('/task/facebookRef/:taskId', function(req,res,next){
     console.log('Id on tasks '+ req.params.taskId);
-    FB.api('me', function(response){
-=======
-router.get('/task/:taskId/facebookRef', function(req,res){
-    FB.api('me/taggable_friends', function(response){
->>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
+    FB.api('/me', function(response){
         if(!res || res.error){
             res.render('index', {title : 'Fail', friends : []});
             return;
-        }
-<<<<<<< HEAD
-
-        user.findOne({facebook_id : response.id},function(err,userFound){
-            if(err){
-                console.log(err);
-                res.status(500).json('Sorry, internal error');
-            }else if(userFound === null){
-                var newUser = {
-                    facebook_id : response.id,
-                    name : response.name,
-                    tasksAssigned : []
-                }
-                newUser.tasksAssigned.push(req.params.taskId);
-                user.create(newUser, function(err, userCreated){
-                    if(err){
-                        console.log(err);
-                        res.status(500).json('Sorry, the new user could not be saved');
+        }else{
+            user.findOne({facebook_id : response.id},function(err,userFound){
+                if(err){
+                    console.log(err);
+                    res.status(500).json('Sorry, internal error');
+                }else if(userFound === null){
+                    var newUser = {
+                        facebook_id : response.id,
+                        name : response.name,
+                        tasksAssigned : []
                     }
-                    else{
-                        console.log('user created');
-                        res.status(201).json('success 1');
-                        console.log('success 1');
-                        res.sendFile('taskReceived.html', {root: path.resolve(__dirname + '/../' + 'public')});
-                    }
-                });
-            }else{
-                console.log(req.params.taskId);
-                if(userFound.tasksAssigned.indexOf(req.params.id) == -1){
-                    userFound.tasksAssigned.push(req.params.taskId);
-                    userFound.save(function(err){
+                    newUser.tasksAssigned.push(req.params.taskId);
+                    user.create(newUser, function(err, userCreated){
                         if(err){
                             console.log(err);
-                        }else{
-                            console.log('success 2');
+                            res.status(500).json('Sorry, the new user could not be saved');
+                        }
+                        else{
+                            console.log('user created');
+                            console.log('success 1');
+                            res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
                         }
                     });
+                }else{
+                    console.log(req.params.taskId);
+                    if(userFound.tasksAssigned.indexOf(req.params.taskId) == -1){
+                        userFound.tasksAssigned.push(req.params.taskId);
+                        userFound.save(function(err){
+                            if(err){
+                                console.log(err);
+                            }else{
+                                console.log('success 2');
+                            }
+                        });
+                    }
+                    console.log(path.resolve(__dirname + '/../' + 'public'));
+                    res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
                 }
-                console.log(path.resolve(__dirname + '/../' + 'public'));
-                res.sendFile('taskReceived.html', {root: path.resolve(__dirname + '/../' + 'public')});
-            }
-        });    
+            });    
+        }
+
     });
 });
-=======
-        res.send(response.data);
-    })
-});
+
 
 //router.get('/:id/tasks', function(req,res){
 //    var id = req.params.id;
@@ -200,9 +187,6 @@ router.get('/task/:taskId/facebookRef', function(req,res){
 //            res.status(200).json(tasks);
 //        }
 //    });
-//});
->>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
-
 
 router.get('/:id/tasks', function(req,res){
     var id = req.params.id;
@@ -215,7 +199,6 @@ router.get('/:id/tasks', function(req,res){
                 res.status(200).json(tasks);
             }
         });
-<<<<<<< HEAD
 });
 
 
@@ -235,8 +218,29 @@ router.get('/:id/tasksAssigned', function(req,res){
             });
         }
     });
-=======
->>>>>>> 0f9a586ce3e1fe14f3b4c8229c3c690a3d40bc8c
+});
+
+
+router.get('/:id/taskAssigned/:taskId', function(req,res){
+    var userId = req.params.id;
+    var taskId = req.params.taskId;
+    
+    user.findById(userId, function(err, userFoud){
+        if(err){
+            res.status(500).json(err);
+        }else{
+            var tasksAssigned = userFoud.tasksAssigned;
+            if(tasksAssigned.indexOf(taskId) > -1){
+                task.findById(taskId, function(err, task){
+                    if(err){
+                        res.status(500).json(err);
+                    }else{
+                        res.status(200).json(task);        
+                    }
+                });
+            }
+        }
+    });
 });
 
 
