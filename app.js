@@ -186,6 +186,10 @@ app.get('/dashboard', ensureAuthenticated,function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname });
 });
 
+app.get('/myTasks/:facebook', function(req,res){
+    res.redirect('/myTasks');
+});
+
 app.get('/myTasks', ensureAuthenticated,function(req,res){
     res.sendFile('public/myTasks.html', {root: __dirname });
 });
@@ -224,6 +228,7 @@ app.get('/friends', function(req, res){
 });
 
 app.get('/userInfo', ensureAuthenticated, function(req, res){
+    console.log(req.user);
     user.findOne({facebook_id : req.user.id}, function(err, user){
         if(err){
             res.status(500).json(err);

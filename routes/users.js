@@ -209,7 +209,6 @@ router.get('/:id/tasksAssigned', function(req,res){
             res.status(500).json(err);
         }else{
             var tasksAssigned = userFoud.tasksAssigned;
-            console.log(tasksAssigned);
             task.find({
                 '_id': { $in : tasksAssigned}
             }, function(err, tasks){

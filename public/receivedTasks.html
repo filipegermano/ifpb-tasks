@@ -27,8 +27,9 @@
                 </div>
                 <div class="collapse navbar-collapse" id="menu">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="active"><a href="dashboard">Nova Tarefa</a></li>
-                        <li><a href="myTasks">Tarefas</a></li>
+                        <li><a href="dashboard">Nova Tarefa</a></li>
+                        <li><a href="myTasks">Tarefas</a></li>                        
+                        <li class="active"><a href="receivedTasks">Tarefas</a></li>
                     </ul>
                 </div>
             </div>
@@ -40,6 +41,8 @@
             <div id="tasks" class="col-md-6 col-md-offset-3">
                 <div class="task" ng-repeat="task in taskCtrl.tasksAssigned">
                     <h4 class="taskName">{{task.name}}</h4>
+                    <span class="label pull-right labelStatus" ng-class="task.status === 'em aberto' ? 'label-danger' :
+                      (task.status === 'em andamento' ? 'label-primary' : 'label-success')">{{task.status}}</span>  
                     <p class="taskDescription">{{task.description}}</p>
                     <p class="taskCreatedAt"><span class="fa fa-calendar"></span>
                         Data da criação: {{ task.createdAt | date : 'dd/MM/yyyy h:mm:ss a'}}</p>
@@ -55,13 +58,14 @@
                     <div class="assignedTo" ng-repeat="(key, friend) in task.assignedTo">
                         <p class="taskFriendName">{{friend.friendName}}</p>
                     </div>
-                    <h5>Mudar status</h5>
-                    
-                    <a class="btn btn btn-default" ng-show="task.status === 'em aberto'">em andamento</a>
-                    <a class="btn btn btn-default" ng-show="task.status === 'em andamento'">finalizada</a>
-                    
-                    <span class="label pull-right labelStatus" ng-class="task.status === 'em aberto' ? 'label-danger' :
-                    (task.priority === 'em execução' ? 'label-primary' : 'label-success')">{{task.status}}</span>                    
+                    <h5 ng-show="task.status != 'finalizada'">Mudar status</h5>
+<a class="btn btn btn-danger"
+ng-click="taskCtrl.changeStatus(task._id, $index, 'em aberto')">em andamento</a>
+
+                    <a class="btn btn btn-primary" ng-show="task.status === 'em aberto'"
+                       ng-click="taskCtrl.changeStatus(task._id, $index, 'em andamento')">em andamento</a>
+                    <a class="btn btn btn-success" ng-show="task.status === 'em andamento'"
+                       ng-click="taskCtrl.changeStatus(task._id, $index, 'finalizada')">finalizada</a>
                 </div>
             </div>
         </div>
