@@ -23,6 +23,7 @@
                 thisController.selectedFriendsId.push(friendId);
                 thisController.selectedFriendsName.push(friendName);
             }
+            console.log(thisController.selectedFriendsId);
         };
 
         thisController.createTask = function(userId){
@@ -110,6 +111,7 @@
             thisController.selectedFriendsId = [];
             thisController.selectedFriendsName = [];
             thisController.task = {};
+            thisController.btnSelected = 0;
         }
 
     }]);

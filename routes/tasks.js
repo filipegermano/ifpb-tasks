@@ -36,7 +36,7 @@ router.get('/:id', function(req,res,next){
 
     task.findById(req.params.id, function(err, task){
         if(err) {
-            res.status(500).json(err);
+            res.status(500).json({sucess: false});
         }
         res.status(200).json(task);
     });
@@ -87,18 +87,15 @@ function tagFriendChangeTaskStatus(taskId){
         createdById = taskFound.createdBy;
         taskName = taskFound.name;
         taskStatus = taskFound.status;
-        console.log(createdById);
-        console.log(taskName);
-        console.log(taskStatus);
 
         user.findById(createdById, function(err, userFound){
             if(err){
                 console.log(err);
             }
-            var message ="A tarefa" +" \""+taskName+"\" mudou de status"; 
+            var message ="A tarefa" +" \""+taskName+"\" mudou o status para \""+taskStatus+"\""; 
             console.log(message);    
 
-
+            FB.setAccessToken(userFound.accessToken);
             FB.api('me/ifpb-tasks:notify', 'post', {
                 task : {
                     "og:title" : "A tarefa" +" \""+taskName+"\" mudou de status",

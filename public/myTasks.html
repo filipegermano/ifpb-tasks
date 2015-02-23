@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="iftasks">
+<html ng-app="iftasks" ng-controller="PathController as pathCtrl">
     <head>
         <title>IFPB-tasks</title>
         <link href="libs/bootstrap/css/bootstrap.min.cerulean.css" rel="stylesheet" type="text/css">
@@ -28,16 +28,18 @@
                 </div>
                 <div class="collapse navbar-collapse" id="menu">
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="dashboard">Nova Tarefa</a></li>
-                        <li class="active"><a href="myTasks">Tarefas</a></li>
-                        <li><a href="receivedTasks">Tarefas</a></li>
+                        <li><a href="{{pathCtrl.path}}/dashboard">Nova Tarefa</a></li>
+                        <li class="active"><a href="{{pathCtrl.path}}/myTasks">Tarefas Criadas</a></li>
+                        <li><a href="{{pathCtrl.path}}/receivedTasks">Tarefas Recebidas</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
         <div class="container" ng-controller="TaskController as taskCtrl">
             <h2 class="text-center">Tarefas</h2>
-            <p>{{userCtrl.user.id}}</p>
+            <div ng-hide="taskCtrl.tasksCreated.length" class="alert alert-danger col-md-6 col-md-offset-3">
+                <p class="text-center">Nenhuma tarefa criada</p>
+            </div>
             <div id="tasks" class="col-md-6 col-md-offset-3">
                 <div class="task" ng-repeat="task in taskCtrl.tasksCreated">
                     <h4 class="taskName">{{task.name}}</h4>
@@ -57,7 +59,7 @@
                         <p class="taskFriendName">{{friend.friendName}}</p>
                     </div>
                     <span class="label pull-right labelStatus" ng-class="task.status === 'em aberto' ? 'label-danger' :
-                                                                         (task.priority === 'em execução' ? 'label-primary' : 'label-success')">{{task.status}}</span>
+                                                                         (task.status === 'em andamento' ? 'label-primary' : 'label-success')">{{task.status}}</span>
                 </div>
             </div>
         </div>

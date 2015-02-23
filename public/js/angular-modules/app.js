@@ -29,6 +29,13 @@
                 }
             }
         };
+        
+        
 
     }]);
+    
+    app.controller('PathController', function(){
+        this.path = window.location.origin;
+    });
+    
 })();

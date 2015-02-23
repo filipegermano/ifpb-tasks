@@ -27,7 +27,6 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req,res,next){
     var newUser = req.body;
-    console.log('req body '+JSON.stringify(req.body));
     user.findOne({facebook_id : newUser.facebook_id}, function(err, userFound){
         if(err){
             console.error(err);
@@ -40,7 +39,7 @@ router.post('/', function(req,res,next){
                     res.status(500).json('Sorry, the new user could not be saved');
                 }
                 else{
-                    res.status(201).json('new user');
+                    res.status(201).json({sucess: true});
                 }
             });
 
@@ -48,7 +47,7 @@ router.post('/', function(req,res,next){
             console.log('will not save user');
             user.findByIdAndUpdate(userFound._id, newUser, function(err, userUpdated){
                 if(err) return next(err);
-                res.status(200).json('old user');
+                res.status(200).json({sucess: true});
             });
         }
     });
@@ -59,7 +58,7 @@ router.post('/newTask/:id', function(req,res,next){
     user.findOne({facebook_id : req.params.id}, function(err, userFound){
         if(err){
             console.log(err);
-            res.status(500).json('Sorry, internal error');
+            res.status(500).json({sucess: false});
         }else{
             var newTask = req.body;
             newTask.status = 'em aberto';
@@ -67,16 +66,16 @@ router.post('/newTask/:id', function(req,res,next){
             task.create(newTask, function(err, createdTask){
                 if(err){
                     console.log(err);
-                    res.status(500).json('Sorry, internal error (task not saved)');
+                    res.status(500).json({sucess: true});
                 }else{
-                    res.status(201).json('New task created');
                     userFound.tasksCreated.push(createdTask._id);
                     userFound.save(function(err){
                         if(err){
                             console.log(err);
                         }
                     });
-                    tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo, newTask.status);
+                    tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo, userFound.accessToken);
+                    res.status(201).json({sucess: true});
                 }
             });
 
@@ -86,7 +85,7 @@ router.post('/newTask/:id', function(req,res,next){
 });
 
 
-function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
+function tagFriends(taskName, taskDescription,taskId , assignedTo, accessToken){
 
     var mentions = '';
     var tags = [];
@@ -98,9 +97,9 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
 
     var tagsSeparatedByComma = tags.join();
 
-    var msg = 'Nova Tarefa ['+taskName+'] - ' + ' Status: ' + status + ' ' + mentions;
-
-
+    var msg = 'Você tem uma nova tarefa ['+taskName+'] ' + mentions;
+    console.log(accessToken);
+    FB.setAccessToken(accessToken);
     FB.api('me/ifpb-tasks:create', 'post', {
         task : {
             "og:title" : taskName,
@@ -127,13 +126,16 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, status){
 }
 
 router.get('/task/facebookRef/:taskId', function(req,res,next){
-    console.log('Id on tasks '+ req.params.taskId);
+    FB.setAccessToken(getAccessTokenFromUser(req.params.taskId));
     FB.api('/me', function(response){
         if(!res || res.error){
             res.render('index', {title : 'Fail', friends : []});
             return;
         }else{
-            user.findOne({facebook_id : response.id},function(err,userFound){
+            
+            console.log(response);
+            
+            user.findOne({facebook_id : response.id},function(err, userFound){
                 if(err){
                     console.log(err);
                     res.status(500).json('Sorry, internal error');
@@ -150,8 +152,7 @@ router.get('/task/facebookRef/:taskId', function(req,res,next){
                             res.status(500).json('Sorry, the new user could not be saved');
                         }
                         else{
-                            console.log('user created');
-                            console.log('success 1');
+                            console.log('user created here');
                             res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
                         }
                     });
@@ -163,7 +164,7 @@ router.get('/task/facebookRef/:taskId', function(req,res,next){
                             if(err){
                                 console.log(err);
                             }else{
-                                console.log('success 2');
+                                console.log('success');
                             }
                         });
                     }
@@ -177,24 +178,23 @@ router.get('/task/facebookRef/:taskId', function(req,res,next){
 });
 
 
-//router.get('/:id/tasks', function(req,res){
-//    var id = req.params.id;
-//    console.log(id);
-//    task.find({createdBy : req.params.id}, function(err, tasks){
-//        if(err) {
-//            res.status(500).json(err);
-//        }else{
-//            res.status(200).json(tasks);
-//        }
-//    });
+function getAccessTokenFromUser(taskId){
+    task.findById(taskId, function(err, taskFound){
+        if(err) console.log(err);
+        user.findById(taskFound.createdBy, function(err, userFound){
+            if(err) console.log(err);
+            return userFound.accessToken;          
+        });
+    });
+}
+
 
 router.get('/:id/tasks', function(req,res){
     var id = req.params.id;
-    console.log(id);
     task.find({createdBy : req.params.id}).sort({deadline: 'desc'}).exec(
         function(err, tasks){
             if(err) {
-                res.status(500).json(err);
+                res.status(500).json({sucess: false});
             }else{
                 res.status(200).json(tasks);
             }
@@ -204,15 +204,14 @@ router.get('/:id/tasks', function(req,res){
 
 router.get('/:id/tasksAssigned', function(req,res){
     var id = req.params.id;
-    user.findById(id, function(err, userFoud){
+    user.findById(id, function(err, userFound){
         if(err){
-            res.status(500).json(err);
+            res.status(500).json({sucess: false});
         }else{
-            var tasksAssigned = userFoud.tasksAssigned;
+            var tasksAssigned = userFound.tasksAssigned;
             task.find({
                 '_id': { $in : tasksAssigned}
             }, function(err, tasks){
-                console.log(tasks);
                 res.status(200).json(tasks);
             });
         }
@@ -223,16 +222,16 @@ router.get('/:id/tasksAssigned', function(req,res){
 router.get('/:id/taskAssigned/:taskId', function(req,res){
     var userId = req.params.id;
     var taskId = req.params.taskId;
-    
+
     user.findById(userId, function(err, userFoud){
         if(err){
-            res.status(500).json(err);
+            res.status(500).json({sucess: false});
         }else{
             var tasksAssigned = userFoud.tasksAssigned;
             if(tasksAssigned.indexOf(taskId) > -1){
                 task.findById(taskId, function(err, task){
                     if(err){
-                        res.status(500).json(err);
+                        res.status(500).json({sucess: false});
                     }else{
                         res.status(200).json(task);        
                     }
@@ -243,18 +242,20 @@ router.get('/:id/taskAssigned/:taskId', function(req,res){
 });
 
 
-router.put('/:id', function(req,res,next){
-    user.findByIdAndUpdate(req.params.id, req.body, function(err, users){
-        if(err) return next(err);
-        res.json(users);
-    });
-});
+//router.put('/:id', function(req,res,next){
+//    user.findByIdAndUpdate(req.params.id, req.body, function(err, users){
+//        if(err) return next(err);
+//        res.json(users);
+//    });
+//});
 
 router.delete('/:id', function(req,res,next){
-    console.log('test');
     user.findByIdAndRemove(req.params.id, function(err, users){
-        if(err) return next(err);
-        res.status(200).json(users);
+        if(err){ 
+            res.status(500).json({sucess: false});
+        }else{
+            res.status(200).json(users);
+        }
     });
 });
 
