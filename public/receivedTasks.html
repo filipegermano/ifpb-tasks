@@ -2,6 +2,7 @@
 <html ng-app="iftasks" ng-controller="PathController as pathCtrl">
     <head>
         <title>IFPB-tasks</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <link href="../../../libs/bootstrap/css/bootstrap.min.cerulean.css" rel="stylesheet" type="text/css">
         <link href="../../../libs/font-awesome-4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
         <link href="../../../stylesheets/style.css" rel="stylesheet" type="text/css">
@@ -23,7 +24,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">IFPB-tasks</a>
+                    <a class="navbar-brand" href="{{pathCtrl.path}}/dashboard">IFPB-tasks</a>
                 </div>
                 <div class="collapse navbar-collapse" id="menu">
                     <ul class="nav navbar-nav navbar-right">
@@ -35,14 +36,16 @@
             </div>
         </nav>
         <div class="container" ng-controller="TaskReceivedController as taskCtrl">
-            <h1 class="text-center">IFPB-tasks <small>Tarefas recebidas</small></h1>
+            <h2 class="text-center">Tarefas recebidas</h2>
 
-            <div ng-hide="taskCtrl.tasksAssigned.length" class="alert alert-danger col-md-6 col-md-offset-3">
-                <p class="text-center">Nenhuma tarefa recebida</p>
-            </div>
-
-            <p>{{userCtrl.user.id}}</p>
             <div id="tasks" class="col-md-6 col-md-offset-3">
+                <div id="loaderDiv">
+                    <span class="loader fa fa-cog fa-spin fa-5x" id="taskloader"></span>
+                </div>
+                <div class="alert alert-danger col-md-6 col-md-offset-3" id="emptyTasks">
+                    <p class="text-center">Nenhuma tarefa criada</p>
+                </div>
+                
                 <div class="task" ng-repeat="task in taskCtrl.tasksAssigned">
                     <h4 class="taskName">{{task.name}}</h4>
                     <span class="label pull-right labelStatus" ng-class="task.status === 'em aberto' ? 'label-danger' :

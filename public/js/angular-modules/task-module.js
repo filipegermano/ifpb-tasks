@@ -87,9 +87,14 @@
         }
 
         $http.get('./../../userInfo').success(function(user){
-            $http.get('./../../users/'+user._id+'/tasks').success(function(data){
+            $http.get('./../../users/'+user.facebook_id+'/tasks').success(function(data){
                 thisController.tasksCreated = data;
-                console.log(data);
+                $('#loaderDiv').hide();
+                
+                if(thisController.tasksCreated.length==0){
+                    $('#emptyTasks').show();
+                }
+                
             }).error(function(data){
                 console.log(data);
             });

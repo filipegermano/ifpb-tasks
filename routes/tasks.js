@@ -16,29 +16,23 @@ router.get('/', function(req,res){
     });
 });
 
-router.delete('/all', function(req,res){
-    task.collection.remove( function (err) {
-        if (err) throw err;
-        // collection is now empty but not deleted
-    });
-    res.status(200).json('All taks removed');
-})
-
-router.delete('/:id', function(req,res,next){
-    task.findByIdAndRemove(req.params.id, function(err, tasks){
-        if(err) return next(err);
-        res.status(200).json(tasks);
-    });
-});
-
-
 router.get('/:id', function(req,res,next){
-
     task.findById(req.params.id, function(err, task){
         if(err) {
             res.status(500).json({sucess: false});
         }
         res.status(200).json(task);
+    });
+});
+
+router.delete('/:id', function(req,res,next){
+    task.findByIdAndRemove(req.params.id, function(err, tasks){
+        if(err) {
+            console.log(err);
+            res.status(500).json();
+        }else{
+            res.status(200).json(tasks);
+        }
     });
 });
 
@@ -55,25 +49,7 @@ router.put('/:id',function(req,res,next){
             res.status(200).json({sucess : true});
         }
     });
-
-    //    task.findById(req.params.id, function (err, taskFound){
-    //        if(err){
-    //            res.status(500).json(err);
-    //        }
-    //        else{
-    //            taskFound.status = req.body.status;
-    //            taskFound.save(function(err1){
-    //                if(err1){
-    //                    res.status(500).json(err1);
-    //                }else{
-    //                    res.status(200).json({sucess : true});
-    //                    tagFriendChangeTaskStatus(taskFound.createdBy, taskFound.name);
-    //                }
-    //            });
-    //        }
-    //    });
 });
-
 
 function tagFriendChangeTaskStatus(taskId){
 
@@ -101,7 +77,7 @@ function tagFriendChangeTaskStatus(taskId){
                     "og:title" : "A tarefa" +" \""+taskName+"\" mudou de status",
                     "og:description" : "O novo status é "+ "\""+taskStatus+"\"",
                     "og:image": "http://i58.tinypic.com/15gqmaf.png",
-                    "og:url" : "http://localhost:3000/myTasks/facebook"
+                    "og:url" : "https://ifpbtasks.herokuapp.com/myTasks/facebook"
                 },
                 message: message,
                 tags : userFound.facebook_id,
@@ -125,6 +101,22 @@ function tagFriendChangeTaskStatus(taskId){
     });
 }
 
+//    task.findById(req.params.id, function (err, taskFound){
+//        if(err){
+//            res.status(500).json(err);
+//        }
+//        else{
+//            taskFound.status = req.body.status;
+//            taskFound.save(function(err1){
+//                if(err1){
+//                    res.status(500).json(err1);
+//                }else{
+//                    res.status(200).json({sucess : true});
+//                    tagFriendChangeTaskStatus(taskFound.createdBy, taskFound.name);
+//                }
+//            });
+//        }
+//    });
 
 
 module.exports = router;

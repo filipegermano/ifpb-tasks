@@ -30,8 +30,6 @@
             }
         };
         
-        
-
     }]);
     
     app.controller('PathController', function(){

@@ -39,7 +39,7 @@ router.post('/', function(req,res,next){
                     res.status(500).json('Sorry, the new user could not be saved');
                 }
                 else{
-                    res.status(201).json({sucess: true});
+                    res.status(201).json(userCreated);
                 }
             });
 
@@ -47,7 +47,7 @@ router.post('/', function(req,res,next){
             console.log('will not save user');
             user.findByIdAndUpdate(userFound._id, newUser, function(err, userUpdated){
                 if(err) return next(err);
-                res.status(200).json({sucess: true});
+                res.status(200).json(userUpdated);
             });
         }
     });
@@ -56,7 +56,7 @@ router.post('/', function(req,res,next){
 
 router.post('/newTask/:id', function(req,res,next){
     user.findOne({facebook_id : req.params.id}, function(err, userFound){
-        if(err){
+        if(err || userFound == null){
             console.log(err);
             res.status(500).json({sucess: false});
         }else{
@@ -66,7 +66,7 @@ router.post('/newTask/:id', function(req,res,next){
             task.create(newTask, function(err, createdTask){
                 if(err){
                     console.log(err);
-                    res.status(500).json({sucess: true});
+                    res.status(500).json({sucess: false});
                 }else{
                     userFound.tasksCreated.push(createdTask._id);
                     userFound.save(function(err){
@@ -75,7 +75,7 @@ router.post('/newTask/:id', function(req,res,next){
                         }
                     });
                     tagFriends(newTask.name, newTask.description, createdTask._id, newTask.assignedTo, userFound.accessToken);
-                    res.status(201).json({sucess: true});
+                    res.status(201).json(createdTask);
                 }
             });
 
@@ -85,7 +85,7 @@ router.post('/newTask/:id', function(req,res,next){
 });
 
 
-function tagFriends(taskName, taskDescription,taskId , assignedTo, accessToken){
+function tagFriends(taskName, taskDescription, taskId , assignedTo, accessToken){
 
     var mentions = '';
     var tags = [];
@@ -125,86 +125,109 @@ function tagFriends(taskName, taskDescription,taskId , assignedTo, accessToken){
     });
 }
 
-router.get('/task/facebookRef/:taskId', function(req,res,next){
-    FB.setAccessToken(getAccessTokenFromUser(req.params.taskId));
-    FB.api('/me', function(response){
-        if(!res || res.error){
-            res.render('index', {title : 'Fail', friends : []});
-            return;
-        }else{
-            
-            console.log(response);
-            
-            user.findOne({facebook_id : response.id},function(err, userFound){
-                if(err){
-                    console.log(err);
-                    res.status(500).json('Sorry, internal error');
-                }else if(userFound === null){
-                    var newUser = {
-                        facebook_id : response.id,
-                        name : response.name,
-                        tasksAssigned : []
-                    }
-                    newUser.tasksAssigned.push(req.params.taskId);
-                    user.create(newUser, function(err, userCreated){
-                        if(err){
-                            console.log(err);
-                            res.status(500).json('Sorry, the new user could not be saved');
-                        }
-                        else{
-                            console.log('user created here');
-                            res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
-                        }
-                    });
-                }else{
-                    console.log(req.params.taskId);
-                    if(userFound.tasksAssigned.indexOf(req.params.taskId) == -1){
-                        userFound.tasksAssigned.push(req.params.taskId);
-                        userFound.save(function(err){
-                            if(err){
-                                console.log(err);
-                            }else{
-                                console.log('success');
-                            }
-                        });
-                    }
-                    console.log(path.resolve(__dirname + '/../' + 'public'));
-                    res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
-                }
-            });    
-        }
-
-    });
-});
-
-
-function getAccessTokenFromUser(taskId){
-    task.findById(taskId, function(err, taskFound){
-        if(err) console.log(err);
-        user.findById(taskFound.createdBy, function(err, userFound){
-            if(err) console.log(err);
-            return userFound.accessToken;          
-        });
-    });
-}
+//router.get('/task/facebookRef/:taskId', function(req,res,next){
+//    FB.setAccessToken(getAccessTokenFromUser(req.params.taskId));
+//    FB.api('/me', function(response){
+//        if(!res || res.error){
+//            res.render('index', {title : 'Fail', friends : []});
+//            return;
+//        }else{
+//            
+//            console.log(response);
+//            
+//            user.findOne({facebook_id : response.id},function(err, userFound){
+//                if(err){
+//                    console.log(err);
+//                    res.status(500).json('Sorry, internal error');
+//                }else if(userFound === null){
+//                    var newUser = {
+//                        facebook_id : response.id,
+//                        name : response.name,
+//                        tasksAssigned : []
+//                    }
+//                    newUser.tasksAssigned.push(req.params.taskId);
+//                    user.create(newUser, function(err, userCreated){
+//                        if(err){
+//                            console.log(err);
+//                            res.status(500).json('Sorry, the new user could not be saved');
+//                        }
+//                        else{
+//                            console.log('user created here');
+//                            res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
+//                        }
+//                    });
+//                }else{
+//                    console.log(req.params.taskId);
+//                    if(userFound.tasksAssigned.indexOf(req.params.taskId) == -1){
+//                        userFound.tasksAssigned.push(req.params.taskId);
+//                        userFound.save(function(err){
+//                            if(err){
+//                                console.log(err);
+//                            }else{
+//                                console.log('success');
+//                            }
+//                        });
+//                    }
+//                    console.log(path.resolve(__dirname + '/../' + 'public'));
+//                    res.sendFile('receivedTasks.html', {root: path.resolve(__dirname + '/../' + 'public')});
+//                }
+//            });    
+//        }
+//
+//    });
+//});
+//
+//
+//function getAccessTokenFromUser(taskId){
+//    task.findById(taskId, function(err, taskFound){
+//        if(err) console.log(err);
+//        user.findById(taskFound.createdBy, function(err, userFound){
+//            if(err) console.log(err);
+//            return userFound.accessToken;          
+//        });
+//    });
+//}
 
 
 router.get('/:id/tasks', function(req,res){
-    var id = req.params.id;
-    task.find({createdBy : req.params.id}).sort({deadline: 'desc'}).exec(
-        function(err, tasks){
-            if(err) {
-                res.status(500).json({sucess: false});
-            }else{
-                res.status(200).json(tasks);
-            }
-        });
+    user.findOne({facebook_id: req.params.id},function(err, userFound){
+        if(err || userFound == null){
+            res.status(500).json({sucess: false});
+        }
+        else{
+            task.find({createdBy : userFound._id}).sort({deadline: 'desc'}).exec(
+                function(err, tasks){
+                    if(err) {
+                        res.status(500).json({sucess: false});
+                    }else{
+                        res.status(200).json(tasks);
+                    }
+                });
+        }
+    });
+
+});
+
+router.get('/friendList/:id', function(req,res){
+    user.findOne({facebook_id: req.params.id}, function(err, userFound){
+        if(err || userFound == null){
+            res.status(500).json({sucess: false});
+        }else{
+            FB.setAccessToken(userFound.accessToken);
+            FB.api('me/taggable_friends', {fields:'name,picture.width(60).height(60)'}, function(response){
+                if(!res || res.error){
+                    res.render('index', {title : 'Fail', friends : []});
+                    return;
+                }
+                res.send(response.data);
+            });
+        }
+    }); 
 });
 
 
 router.get('/:id/tasksAssigned', function(req,res){
-    var id = req.params.id;
-    user.findById(id, function(err, userFound){
+    user.findOne({facebook_id: req.params.id}, function(err, userFound){
         if(err){
             res.status(500).json({sucess: false});
         }else{
@@ -218,37 +241,6 @@ router.get('/:id/tasksAssigned', function(req,res){
     });
 });
 
-
-router.get('/:id/taskAssigned/:taskId', function(req,res){
-    var userId = req.params.id;
-    var taskId = req.params.taskId;
-
-    user.findById(userId, function(err, userFoud){
-        if(err){
-            res.status(500).json({sucess: false});
-        }else{
-            var tasksAssigned = userFoud.tasksAssigned;
-            if(tasksAssigned.indexOf(taskId) > -1){
-                task.findById(taskId, function(err, task){
-                    if(err){
-                        res.status(500).json({sucess: false});
-                    }else{
-                        res.status(200).json(task);        
-                    }
-                });
-            }
-        }
-    });
-});
-
-
-//router.put('/:id', function(req,res,next){
-//    user.findByIdAndUpdate(req.params.id, req.body, function(err, users){
-//        if(err) return next(err);
-//        res.json(users);
-//    });
-//});
-
 router.delete('/:id', function(req,res,next){
     user.findByIdAndRemove(req.params.id, function(err, users){
         if(err){ 
@@ -258,5 +250,35 @@ router.delete('/:id', function(req,res,next){
         }
     });
 });
+
+//router.get('/:id/taskAssigned/:taskId', function(req,res){
+//    var userId = req.params.id;
+//    var taskId = req.params.taskId;
+//
+//    user.findById(userId, function(err, userFoud){
+//        if(err){
+//            res.status(500).json({sucess: false});
+//        }else{
+//            var tasksAssigned = userFoud.tasksAssigned;
+//            if(tasksAssigned.indexOf(taskId) > -1){
+//                task.findById(taskId, function(err, task){
+//                    if(err){
+//                        res.status(500).json({sucess: false});
+//                    }else{
+//                        res.status(200).json(task);        
+//                    }
+//                });
+//            }
+//        }
+//    });
+//});
+
+
+//router.put('/:id', function(req,res,next){
+//    user.findByIdAndUpdate(req.params.id, req.body, function(err, users){
+//        if(err) return next(err);
+//        res.json(users);
+//    });
+//});
 
 module.exports = router;

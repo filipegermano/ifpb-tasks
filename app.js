@@ -23,6 +23,7 @@ var app = express();
 
 //--mongo
 var mongoose = require('mongoose');
+
 mongoose.connect('mongodb://localhost/ifpb-tasks', function(err){
     if(err){
         console.log('connection error', err);
@@ -37,7 +38,7 @@ app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-//app.use(logger('dev'));
+app.use(logger('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -181,7 +182,7 @@ app.get('/dashboard', ensureAuthenticated,function(req,res){
     res.sendFile('public/dashboard.html', {root: __dirname });
 });
 
-app.get('/myTasks/:facebook', function(req,res){
+app.get('/myTasks/:facebook', ensureAuthenticated, function(req,res){
     res.redirect('/myTasks');
 });
 
